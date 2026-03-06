@@ -1,8 +1,8 @@
-# 02 数据模型
+# 02 Mô hình Dữ liệu
 
-本节对应 `prisma/schema.prisma` 中新增的 graph 相关模型。
+Phần này phân tích rọi chiếu thẳng vào các mô hình liên đới tới "đồ thị luân chuyển (graph)" đã được bưng vào mọc rễ nhúng nhét trong góc tủ `prisma/schema.prisma`. 
 
-## 表清单
+## Danh sách Bảng
 
 1. `graph_runs`
 2. `graph_steps`
@@ -13,97 +13,97 @@
 
 ## graph_runs
 
-用途：一次 AI 运行的根对象。
+Công năng: Bức tượng thờ làm Mẹ Tái Sinh Tối Cao nắm đầu một Lượt Khai Màn Xung Trận (Run) trọn bộ của tác vụ AI.
 
-关键字段：
+Các ngọn cờ thông số chủ lực:
 
 - `id`
 - `userId`, `projectId`, `episodeId`
 - `workflowType`, `taskType`, `taskId`
-- `status` (`queued|running|completed|failed|canceling|canceled`)
-- `lastSeq`：run 内事件时钟游标
+- `status` (`queued|running|completed|failed|canceling|canceled`) (Chầu Rìa Đợi|Cởi Quần Chạy|Cắm Cờ Thắng|Sụp Máng Toang|Đang Gào Kêu Thắng Kít|Sổ Bỏ Phủủi Bủi)
+- `lastSeq`: Kẻ soi mõ chạy chỉ kim trên chiếc đồng hồ đếm sự kiện xoay vòng rổ luồng ở trong nôi thằng trùm run.
 - `input`, `output`, `errorCode`, `errorMessage`
 - `cancelRequestedAt`, `queuedAt`, `startedAt`, `finishedAt`
 
-关键约束：
+Đai siết ràng buộc:
 
-- `taskId` 唯一（一个 task 对应一个 run）
+- `taskId` buộc ngậm niêm yết chuẩn duy nhất (Một task rành rành ẵm gọn một bào thai đẽo nặn đút một khuôn run).
 
 ## graph_steps
 
-用途：run 级步骤投影。
+Công năng: Bản nháp phác vẽ hình rọi hắt bong bóng cho những nấc nhún nhảy (Step) leo bộ cắm rễ trong rặng run. 
 
-关键字段：
+Các ngọn cờ thông số chủ lực:
 
-- `runId + stepKey` 唯一
-- `status` (`pending|running|completed|failed|canceled`)
-- `currentAttempt`
+- Đóng đinh hợp thể `runId + stepKey` là độc nhất vô nhị.
+- `status` (`pending|running|completed|failed|canceled`) 
+- `currentAttempt` (Nấc lính tiên phong điểm trỏ gậy dò đường đếm xỉa tróc rớt ngáng bao bận rớt rụng).
 - `stepIndex`, `stepTotal`
 - `lastErrorCode`, `lastErrorMessage`
 
 ## graph_step_attempts
 
-用途：每个 step 的尝试明细。
+Công năng: Tờ giấy phơi nảy rành rọt từng chặng lịch phơi bày rỉa lóc cẩn thận thói bướng trỏ mặt ngóc đầu đâm gục tái giá của cái nấc step (Sổ đếm tội trầy trật nướng tiền).
 
-关键字段：
+Các ngọn cờ thông số chủ lực:
 
-- `runId + stepKey + attempt` 唯一
+- Cục chìa dập lửa kẹp gông bộ ba nhốt tròng `runId + stepKey + attempt` bóp chết chỉ làm cho nẻo đường duy nhất có một không hai.
 - `status`
-- `outputText`, `outputReasoning`
+- `outputText`, `outputReasoning` (Ghi âm xuất ngôn bóp còi lảm nhảm khỉ ho cò gáy suy tâm bão lòi não ra chữ hay gì dán vô đây).
 - `errorCode`, `errorMessage`
-- `usageJson`
+- `usageJson` (Cột xé thẻ giấy kiểm đếm cái cọng lông bạc xót túi tiền đốt lủng bọc tiêu cho màn múa võ đi đong tút đếm cống nạp của AI ra cái mã dẻo json).
 
 ## graph_events
 
-用途：事件日志 + 回放源。
+Công năng: Cuốn sổ bọc bọc lớp nhung dày thu vẹm gói giữ vết bánh in in ngấn tích để xui rủi sập trạm là đem ra nặn bốc hồi chiếu lại từ gốc tới cọng xé phay làm đồ sắm phát bận khất thực.
 
-关键字段：
+Các ngọn cờ thông số chủ lực:
 
-- `runId`
-- `seq`（run 内单调递增）
+- `runId` 
+- `seq` (Nòng đếm răng kim châm không thụt lùi xoay vô cấp vòng gảy tiến lên trong nồi lội chậu ruột cha run).
 - `eventType`
 - `stepKey`, `attempt`, `lane`
 - `payload`
 
-关键约束：
+Đai siết ràng buộc:
 
-- `(runId, seq)` 唯一
+- Kẹp đầu khoá cùm liên danh `(runId, seq)` nhét sổ lồng lộng quy củ tính duy nhất.
 
 ## graph_checkpoints
 
-用途：图节点恢复点。
+Công năng: Ngọn đuốc châm điểm cắn neo chờ chừa đường sấy khô lặn ngụp ngoi phọt lại tại góc ngã của lóng trạm nhánh graph.
 
-关键字段：
+Các ngọn cờ thông số chủ lực:
 
 - `runId`, `nodeKey`, `version`
 - `stateJson`
 - `stateBytes`
 
-约束策略：
+Chiến lược còng dây khoá neo nhốt giới nghiêm gắt gao:
 
-- State 大小守卫，当前实现上限 `64KB`（`RUN_STATE_MAX_BYTES`）。
-- State 只存 refs，不存正文大文本。
+- Gác mõ đặt điểm tựa xông rình cân móc kìm kẹp sình chướng dội của State, với trần mức bung dọng gò chật ở khoản `64KB` (`RUN_STATE_MAX_BYTES`).
+- State lọt ổ chỉ dành cho nón tham chiếu (refs) nương ghé cất gởi, cấm ngoắc nhét kéo tụ họp lu loa cho ba cái đống văn chương dề dạc xập xênh mập dái tổ xủ bự chà bá kềnh rên phình chướng chứa vào họng nhồi vô.
 
 ## graph_artifacts
 
-用途：运行产物引用（DB 行、对象存储、版本哈希等）。
+Công năng: Chỗ cột rễ đu đeo rọi thẻ biển móc thẻ phơi gởi ké trạm nương xác các bùa pháp bảo sản phẩm do đẻ ra ở lúc bay sô thi triển đụng dao đụng thớt (ví như cục mòng dong sạp lưu trữ trên hàng kho tàng DB, giạt trôi bên kệ mây lưới object storage móc ghim ngàm băm mã thắt chốt version hash).
 
-建议存储：
+Tuyệt chiêu bày mưu dọn lối khuyến cáo dành phần rải ổ (Storage layout suggestion):
 
 - `artifactType`
-- `refType`（db/object-storage）
-- `refId` 或 `uri`
+- `refType` (db/object-storage)
+- `refId` hoặc xài đinh nối `uri`
 - `metaJson`
 
-## 时钟与事务策略
+## Thời Khắc Biểu Kế Và Kê Lưới Đan Chuyền Luồng Rổ Hàng Tráo Tay (Trạm Tác Lập Trình Giao Dịch Transaction)
 
-`appendRunEventWithSeq` 在单事务内执行：
+Con gõ mỏ ngậm phèng la chiêu pháp `appendRunEventWithSeq` được bó chân buộc ngàm gõ chuông trong một hộp kính nhốt trọn vỏn vẹn đúng một phiên Giao dịch duy nhất:
 
-1. `graph_runs.lastSeq += 1`
-2. 插入 `graph_events(seq=lastSeq)`
-3. 更新 step/run 投影
+1. Sang số cộng điểm vào ví `graph_runs.lastSeq += 1` 
+2. Luồn chọc thọc ruột chốt nhét tọt vô lỗ cái bảng đinh kẹp của `graph_events(seq=lastSeq)`
+3. Tung phép soi rọi phả cập nhật phủ đính vẽ lại lớp rọi bóng cho anh kép chóp màn step/run (Updating the projections).
 
-这样保证：
+Làm vầy để chắp tay gõ mõ hứa trước bàn dân thiên hạ đảm bảo rằng:
 
-- 不会生成重复 seq
-- 事件与投影一致提交
+- Mãi mãi cạch mặt không bao giờ thụt lố vọc ngoáy sinh đôi ra nguyên bầy thằng cu con số thẻ giống nhau nằm trong díp mã gãy seq. 
+- Ngay khi xướng tin phát tờ rơi thì cái díp chiếu rọi phết nước sơn phản chiếu cũng gật đầu đồng thuận ký biên bản chốt kèo gộp đi chung tay nhau dắt qua ranh cập bến đồng bộ chát chúa tuyệt bích mỹ mãn. 

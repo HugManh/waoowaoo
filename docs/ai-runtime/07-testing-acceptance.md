@@ -1,28 +1,28 @@
-# 07 测试与验收
+# 07 Tiêu chuẩn Kiểm thử và Nghiệm thu (Testing & Acceptance)
 
-## 验收目标
+## Mục tiêu Nghiệm thu (Acceptance Goals)
 
-1. 状态一致：不出现“run 完成但 step 卡 running”。
-2. 顺序一致：按 seq 单调推进，重复事件不回退状态。
-3. 恢复一致：刷新后能恢复 run 快照和增量输出。
-4. 失败可解释：run.error/step.error 有明确错误码与错误信息。
+1. Trạng thái Trùng sóng (State Consistency): Tuyệt đối không xuất hiện lỗi hiển thị "run đã gõ chiêng báo hoàn thành mà step hiện chạy vẫn hụt kim xoay vòng vòng báo `running`".
+2. Trình tự Thẳng lối (Sequence Consistency): Quá trình thụ thụ đẩy tiến thẳng bằng trục nhịp `seq` tự tăng, mấy sự kiện xào đi xào lại trùng khớp rập khuôn phải bị sút văng không được làm đảo lùi thụt hạng vòng xoay. 
+3. Kế sinh Phục hồi Toàn vẹn (Recovery Consistency): Nhấn lại nút F5 phải bung lụa mở lột tung lại nguyên măm chập hình snapshot của luồng run cùng đống bù dầy gom lặt (incremental) còn lại cho trọn.
+4. Lỗi lầm phải được Điểm mặt gọi Tên (Explainable Failures): Bảng cáo trạng `run.error` / `step.error` bắt buộc phải xăm rạch ròi thẻ mã lỗi (error code) cùng thư báo điếng hồn cụ thể.
 
-## 最低测试矩阵
+## Ma trận Kiểm thử Mức sàn (Minimum Testing Matrix)
 
-每个核心 workflow 至少覆盖：
+Mỗi mạch rễ chủ lõi (Core workflow) ít nhất phải trùm kín chăn lên đầu lên gối 5 mặt trận:
 
-1. 成功路径
-2. 可重试失败后成功
-3. 不可重试失败
-4. 中途取消
-5. 刷新恢复
+1. Luồng Lướt sóng hanh thông (Success path)
+2. Luồng Lì lợm bật Cứu sóng (Có cửa xoay đầu Retry lại rồi báo vinh quang)
+3. Luồng Chạm gót mồ hôi Liệm Tử (Lỗi câm thắt cổ Không có cửa Retry)
+4. Luồng Phạt ngang Cắt Còi (Luồn Cancel vỡ mũi giữa chừng)
+5. Luồng Đạp nút Tái sinh (F5 Refresh mọc cành đâm nhánh mới)
 
-## 当前新增测试
+## Thớt Kiểm thử mới vừa nhồi thêm trên sạp (Current Additions)
 
 1. `tests/unit/run-runtime/task-bridge.test.ts`
 2. `tests/unit/helpers/run-request-executor.run-events.test.ts`
 
-## 建议执行命令
+## Trật tự Ra lệnh Gợi ý (Recommended Commands)
 
 ```bash
 npx vitest run tests/unit/run-runtime/task-bridge.test.ts
@@ -32,11 +32,11 @@ npm run build
 npm run test:regression
 ```
 
-## 当前已知阻塞
+## Khúc mắc Nỗi kẹt xe Đoạn đường Hiện Giờ (Known Blockers)
 
-`test:regression` 当前存在仓库内既有失败（非本轮 run-runtime 文档化引入）：
+Lão gạc lính chì `test:regression` hiện còn rớt lại đằng sau trơ trọi một rổ báo động rụng bi thảm đến từ đám sành sứ di tích của nếp cũ (Không có dây mơ rễ má móc tới cõi ranh đồ tể tái định hình `run-runtime` đợt rày):
 
 1. `tests/unit/optimistic/task-target-overlay.test.ts`
 2. `tests/unit/billing/cost-error-branches.test.ts`
 
-这些失败需单独修复后才能宣告全量回归绿灯。
+Mớ ngòng ngọc gò đống này đành quăng cho rảnh rồi ôm lại sửa riêng từng cụm, vá sạch tinh tươm hẵng múa gậy khuyêng tù văng cáo bái lên xanh mượt cả thảm (full regression pass green). 

@@ -1,10 +1,10 @@
-# 04 接口契约
+# 04 Hợp đồng API (API Contract)
 
-## 1) 创建 Run
+## 1) Lệnh Khởi tạo một phi vụ Run mới
 
 `POST /api/runs`
 
-请求：
+Chi tiết Yêu cầu (Request):
 
 ```json
 {
@@ -18,7 +18,7 @@
 }
 ```
 
-响应：
+Phiếu Trả lời (Response):
 
 ```json
 {
@@ -28,11 +28,11 @@
 }
 ```
 
-## 2) 查询 Run 列表
+## 2) Lệnh Truy vấn danh sách tổng các Run
 
 `GET /api/runs?projectId=&workflowType=&status=&limit=`
 
-响应：
+Phiếu Trả lời (Response):
 
 ```json
 {
@@ -40,11 +40,11 @@
 }
 ```
 
-## 3) 查询 Run 快照
+## 3) Lệnh Trích lục Ảnh chụp nhanh (Snapshot) của một Run
 
 `GET /api/runs/:runId`
 
-响应：
+Phiếu Trả lời (Response):
 
 ```json
 {
@@ -53,11 +53,11 @@
 }
 ```
 
-## 4) 查询增量事件
+## 4) Lệnh Trích xuất Sự kiện dồn tích (Incremental Events)
 
 `GET /api/runs/:runId/events?afterSeq=0&limit=200`
 
-响应：
+Phiếu Trả lời (Response):
 
 ```json
 {
@@ -67,11 +67,11 @@
 }
 ```
 
-## 5) 取消 Run
+## 5) Lệnh Hủy ngang Run (Cancel Run)
 
 `POST /api/runs/:runId/cancel`
 
-响应：
+Phiếu Trả lời (Response):
 
 ```json
 {
@@ -80,13 +80,13 @@
 }
 ```
 
-## 鉴权规则
+## Luật Thẩm tra Bí Phán Quyền Lực (Authentication Rules)
 
-- 必须登录。
-- 仅允许访问 `run.userId === session.user.id` 的数据。
+- Bắt buộc phải được Lệnh Phê chuẩn mộc Đăng Nhập (Login).
+- Chỉ mở cửa mả chốt chui qua xem được rổ đồ vật với thẻ lòi `run.userId === session.user.id`.
 
-## 兼容关系
+## Tổ Hợp Lấn Sân Đan Chắp (Compatibility Relations)
 
-- 现有业务 route 仍走 `submitTask`。
-- `submitTask` 现在会返回 `taskId` + `runId`（AI 任务）。
-- 前端优先消费 run 事件，task SSE 作为兜底链路。
+- Con kênh giao lộ hiện hữu ngõ business route muôn đời vẫn đang dắt díu lối cũ dẫn đạp lên nấm mồ `submitTask`.
+- Tuy nhiên, đường cống `submitTask` vừa thi công nạo vét lúc rày sẽ phụt ói ra đôi ngọc bội đính móc `taskId` đi kè cùng `runId` (Chỉ dích nhắm bọc vào lũ kèn cựa AI nhiệm vụ thôi nhé).
+- Khu mặt trước Frontend thì cưng nựng ưu tiên mâm trầu nhặt nướng tiêu mẩu đồ run event, với cửa nẻo task SSE lùi chầu chực nhón chân nhẫn chịu thân mồi câm câu dự bị thay chốt dạt phòng hờ.

@@ -31,54 +31,54 @@ export function getAspectRatioConfig(ratio: string) {
 }
 
 export const ANALYSIS_MODELS = [
-  { value: 'google/gemini-3-pro-preview', label: 'Gemini 3 Pro' },
-  { value: 'google/gemini-3-flash-preview', label: 'Gemini 3 Flash' },
-  { value: 'anthropic/claude-sonnet-4.5', label: 'Claude Sonnet 4.5' },
-  { value: 'anthropic/claude-sonnet-4', label: 'Claude Sonnet 4' }
+  { value: 'google/gemini-3-pro-preview', label: 'Gemini 3 Pro', labelZh: 'Gemini 3 Pro', labelEn: 'Gemini 3 Pro', labelVi: 'Gemini 3 Pro' },
+  { value: 'google/gemini-3-flash-preview', label: 'Gemini 3 Flash', labelZh: 'Gemini 3 Flash', labelEn: 'Gemini 3 Flash', labelVi: 'Gemini 3 Flash' },
+  { value: 'anthropic/claude-sonnet-4.5', label: 'Claude Sonnet 4.5', labelZh: 'Claude Sonnet 4.5', labelEn: 'Claude Sonnet 4.5', labelVi: 'Claude Sonnet 4.5' },
+  { value: 'anthropic/claude-sonnet-4', label: 'Claude Sonnet 4', labelZh: 'Claude Sonnet 4', labelEn: 'Claude Sonnet 4', labelVi: 'Claude Sonnet 4' }
 ]
 
 export const IMAGE_MODELS = [
-  { value: 'doubao-seedream-4-5-251128', label: 'Seedream 4.5' },
-  { value: 'doubao-seedream-4-0-250828', label: 'Seedream 4.0' }
+  { value: 'doubao-seedream-4-5-251128', label: 'Seedream 4.5', labelZh: 'Seedream 4.5', labelEn: 'Seedream 4.5', labelVi: 'Seedream 4.5' },
+  { value: 'doubao-seedream-4-0-250828', label: 'Seedream 4.0', labelZh: 'Seedream 4.0', labelEn: 'Seedream 4.0', labelVi: 'Seedream 4.0' }
 ]
 
 // 图像模型选项（ 生成完整图片）
 export const IMAGE_MODEL_OPTIONS = [
-  { value: 'banana', label: 'Banana Pro (FAL)' },
-  { value: 'banana-2', label: 'Banana 2 (FAL)' },
-  { value: 'gemini-3-pro-image-preview', label: 'Banana (Google)' },
-  { value: 'gemini-3-pro-image-preview-batch', label: 'Banana (Google Batch) 省50%' },
-  { value: 'doubao-seedream-4-0-250828', label: 'Seedream 4.0' },
-  { value: 'doubao-seedream-4-5-251128', label: 'Seedream 4.5' },
-  { value: 'imagen-4.0-generate-001', label: 'Imagen 4.0 (Google)' },
-  { value: 'imagen-4.0-ultra-generate-001', label: 'Imagen 4.0 Ultra' },
-  { value: 'imagen-4.0-fast-generate-001', label: 'Imagen 4.0 Fast' }
+  { value: 'banana', labelZh: 'Banana Pro (FAL)', labelEn: 'Banana Pro (FAL)', labelVi: 'Banana Pro (FAL)' },
+  { value: 'banana-2', labelZh: 'Banana 2 (FAL)', labelEn: 'Banana 2 (FAL)', labelVi: 'Banana 2 (FAL)' },
+  { value: 'gemini-3-pro-image-preview', labelZh: 'Banana (Google)', labelEn: 'Banana (Google)', labelVi: 'Banana (Google)' },
+  { value: 'gemini-3-pro-image-preview-batch', labelZh: 'Banana (Google Batch) 省50%', labelEn: 'Banana (Google Batch) Save 50%', labelVi: 'Banana (Google Batch) Tiết kiệm 50%' },
+  { value: 'doubao-seedream-4-0-250828', labelZh: 'Seedream 4.0', labelEn: 'Seedream 4.0', labelVi: 'Seedream 4.0' },
+  { value: 'doubao-seedream-4-5-251128', labelZh: 'Seedream 4.5', labelEn: 'Seedream 4.5', labelVi: 'Seedream 4.5' },
+  { value: 'imagen-4.0-generate-001', labelZh: 'Imagen 4.0 (Google)', labelEn: 'Imagen 4.0 (Google)', labelVi: 'Imagen 4.0 (Google)' },
+  { value: 'imagen-4.0-ultra-generate-001', labelZh: 'Imagen 4.0 Ultra', labelEn: 'Imagen 4.0 Ultra', labelVi: 'Imagen 4.0 Ultra' },
+  { value: 'imagen-4.0-fast-generate-001', labelZh: 'Imagen 4.0 Fast', labelEn: 'Imagen 4.0 Fast', labelVi: 'Imagen 4.0 Fast' }
 ]
 
 // Banana 模型分辨率选项（仅用于九宫格分镜图，单张生成固定2K）
 export const BANANA_RESOLUTION_OPTIONS = [
-  { value: '2K', label: '2K (推荐，快速)' },
-  { value: '4K', label: '4K (高清，较慢)' }
+  { value: '2K', labelZh: '2K (推荐，快速)', labelEn: '2K (Recommended, Fast)', labelVi: '2K (Khuyên dùng, Nhanh)' },
+  { value: '4K', labelZh: '4K (高清，较慢)', labelEn: '4K (HD, Slow)', labelVi: '4K (HD, Chậm)' }
 ]
 
 // 支持分辨率选择的 Banana 模型
 export const BANANA_MODELS = ['banana', 'banana-2', 'gemini-3-pro-image-preview', 'gemini-3-pro-image-preview-batch']
 
 export const VIDEO_MODELS = [
-  { value: 'doubao-seedance-1-0-pro-fast-251015', label: 'Seedance 1.0 Pro Fast' },
-  { value: 'doubao-seedance-1-0-pro-fast-251015-batch', label: 'Seedance 1.0 Pro Fast (批量) 省50%' },
-  { value: 'doubao-seedance-1-0-lite-i2v-250428', label: 'Seedance 1.0 Lite' },
-  { value: 'doubao-seedance-1-0-lite-i2v-250428-batch', label: 'Seedance 1.0 Lite (批量) 省50%' },
-  { value: 'doubao-seedance-1-5-pro-251215', label: 'Seedance 1.5 Pro' },
-  { value: 'doubao-seedance-1-5-pro-251215-batch', label: 'Seedance 1.5 Pro (批量) 省50%' },
-  { value: 'doubao-seedance-1-0-pro-250528', label: 'Seedance 1.0 Pro' },
-  { value: 'doubao-seedance-1-0-pro-250528-batch', label: 'Seedance 1.0 Pro (批量) 省50%' },
-  { value: 'fal-wan25', label: 'Wan 2.6' },
-  { value: 'fal-veo31', label: 'Veo 3.1 Fast' },
-  { value: 'fal-sora2', label: 'Sora 2' },
-  { value: 'fal-ai/kling-video/v2.5-turbo/pro/image-to-video', label: 'Kling 2.5 Turbo Pro' },
-  { value: 'fal-ai/kling-video/v3/standard/image-to-video', label: 'Kling 3 Standard' },
-  { value: 'fal-ai/kling-video/v3/pro/image-to-video', label: 'Kling 3 Pro' }
+  { value: 'doubao-seedance-1-0-pro-fast-251015', labelZh: 'Seedance 1.0 Pro Fast', labelEn: 'Seedance 1.0 Pro Fast', labelVi: 'Seedance 1.0 Pro Fast' },
+  { value: 'doubao-seedance-1-0-pro-fast-251015-batch', labelZh: 'Seedance 1.0 Pro Fast (批量) 省50%', labelEn: 'Seedance 1.0 Pro Fast (Batch) Save 50%', labelVi: 'Seedance 1.0 Pro Fast (Hàng loạt) Tiết kiệm 50%' },
+  { value: 'doubao-seedance-1-0-lite-i2v-250428', labelZh: 'Seedance 1.0 Lite', labelEn: 'Seedance 1.0 Lite', labelVi: 'Seedance 1.0 Lite' },
+  { value: 'doubao-seedance-1-0-lite-i2v-250428-batch', labelZh: 'Seedance 1.0 Lite (批量) 省50%', labelEn: 'Seedance 1.0 Lite (Batch) Save 50%', labelVi: 'Seedance 1.0 Lite (Hàng loạt) Tiết kiệm 50%' },
+  { value: 'doubao-seedance-1-5-pro-251215', labelZh: 'Seedance 1.5 Pro', labelEn: 'Seedance 1.5 Pro', labelVi: 'Seedance 1.5 Pro' },
+  { value: 'doubao-seedance-1-5-pro-251215-batch', labelZh: 'Seedance 1.5 Pro (批量) 省50%', labelEn: 'Seedance 1.5 Pro (Batch) Save 50%', labelVi: 'Seedance 1.5 Pro (Hàng loạt) Tiết kiệm 50%' },
+  { value: 'doubao-seedance-1-0-pro-250528', labelZh: 'Seedance 1.0 Pro', labelEn: 'Seedance 1.0 Pro', labelVi: 'Seedance 1.0 Pro' },
+  { value: 'doubao-seedance-1-0-pro-250528-batch', labelZh: 'Seedance 1.0 Pro (批量) 省50%', labelEn: 'Seedance 1.0 Pro (Batch) Save 50%', labelVi: 'Seedance 1.0 Pro (Hàng loạt) Tiết kiệm 50%' },
+  { value: 'fal-wan25', labelZh: 'Wan 2.6', labelEn: 'Wan 2.6', labelVi: 'Wan 2.6' },
+  { value: 'fal-veo31', labelZh: 'Veo 3.1 Fast', labelEn: 'Veo 3.1 Fast', labelVi: 'Veo 3.1 Fast' },
+  { value: 'fal-sora2', labelZh: 'Sora 2', labelEn: 'Sora 2', labelVi: 'Sora 2' },
+  { value: 'fal-ai/kling-video/v2.5-turbo/pro/image-to-video', labelZh: 'Kling 2.5 Turbo Pro', labelEn: 'Kling 2.5 Turbo Pro', labelVi: 'Kling 2.5 Turbo Pro' },
+  { value: 'fal-ai/kling-video/v3/standard/image-to-video', labelZh: 'Kling 3 Standard', labelEn: 'Kling 3 Standard', labelVi: 'Kling 3 Standard' },
+  { value: 'fal-ai/kling-video/v3/pro/image-to-video', labelZh: 'Kling 3 Pro', labelEn: 'Kling 3 Pro', labelVi: 'Kling 3 Pro' }
 ]
 
 // SeeDream 批量模型列表（使用 GPU 空闲时间，成本降低50%）
@@ -94,63 +94,86 @@ export const AUDIO_SUPPORTED_MODELS = ['doubao-seedance-1-5-pro-251215', 'doubao
 
 // 首尾帧视频模型（能力权威来源是 standards/capabilities；此常量仅作静态兜底展示）
 export const FIRST_LAST_FRAME_MODELS = [
-  { value: 'doubao-seedance-1-5-pro-251215', label: 'Seedance 1.5 Pro (首尾帧)' },
-  { value: 'doubao-seedance-1-5-pro-251215-batch', label: 'Seedance 1.5 Pro (首尾帧/批量) 省50%' },
-  { value: 'doubao-seedance-1-0-pro-250528', label: 'Seedance 1.0 Pro (首尾帧)' },
-  { value: 'doubao-seedance-1-0-pro-250528-batch', label: 'Seedance 1.0 Pro (首尾帧/批量) 省50%' },
-  { value: 'doubao-seedance-1-0-lite-i2v-250428', label: 'Seedance 1.0 Lite (首尾帧)' },
-  { value: 'doubao-seedance-1-0-lite-i2v-250428-batch', label: 'Seedance 1.0 Lite (首尾帧/批量) 省50%' },
-  { value: 'veo-3.1-generate-preview', label: 'Veo 3.1 (首尾帧)' },
-  { value: 'veo-3.1-fast-generate-preview', label: 'Veo 3.1 Fast (首尾帧)' }
+  { value: 'doubao-seedance-1-5-pro-251215', labelZh: 'Seedance 1.5 Pro (首尾帧)', labelEn: 'Seedance 1.5 Pro (I/O Frames)', labelVi: 'Seedance 1.5 Pro (Khung đầu/cuối)' },
+  { value: 'doubao-seedance-1-5-pro-251215-batch', labelZh: 'Seedance 1.5 Pro (首尾帧/批量) 省50%', labelEn: 'Seedance 1.5 Pro (I/O Frames/Batch) Save 50%', labelVi: 'Seedance 1.5 Pro (Khung đầu/cuối/Hàng loạt) Tiết kiệm 50%' },
+  { value: 'doubao-seedance-1-0-pro-250528', labelZh: 'Seedance 1.0 Pro (首尾帧)', labelEn: 'Seedance 1.0 Pro (I/O Frames)', labelVi: 'Seedance 1.0 Pro (Khung đầu/cuối)' },
+  { value: 'doubao-seedance-1-0-pro-250528-batch', labelZh: 'Seedance 1.0 Pro (首尾帧/批量) 省50%', labelEn: 'Seedance 1.0 Pro (I/O Frames/Batch) Save 50%', labelVi: 'Seedance 1.0 Pro (Khung đầu/cuối/Hàng loạt) Tiết kiệm 50%' },
+  { value: 'doubao-seedance-1-0-lite-i2v-250428', labelZh: 'Seedance 1.0 Lite (首尾帧)', labelEn: 'Seedance 1.0 Lite (I/O Frames)', labelVi: 'Seedance 1.0 Lite (Khung đầu/cuối)' },
+  { value: 'doubao-seedance-1-0-lite-i2v-250428-batch', labelZh: 'Seedance 1.0 Lite (首尾帧/批量) 省50%', labelEn: 'Seedance 1.0 Lite (I/O Frames/Batch) Save 50%', labelVi: 'Seedance 1.0 Lite (Khung đầu/cuối/Hàng loạt) Tiết kiệm 50%' },
+  { value: 'veo-3.1-generate-preview', labelZh: 'Veo 3.1 (首尾帧)', labelEn: 'Veo 3.1 (I/O Frames)', labelVi: 'Veo 3.1 (Khung đầu/cuối)' },
+  { value: 'veo-3.1-fast-generate-preview', labelZh: 'Veo 3.1 Fast (首尾帧)', labelEn: 'Veo 3.1 Fast (I/O Frames)', labelVi: 'Veo 3.1 Fast (Khung đầu/cuối)' }
 ]
 
 export const VIDEO_RESOLUTIONS = [
-  { value: '720p', label: '720p' },
-  { value: '1080p', label: '1080p' }
+  { value: '720p', labelZh: '720p', labelEn: '720p', labelVi: '720p' },
+  { value: '1080p', labelZh: '1080p', labelEn: '1080p', labelVi: '1080p' }
 ]
 
 export const TTS_RATES = [
-  { value: '+0%', label: '正常速度 (1.0x)' },
-  { value: '+20%', label: '轻微加速 (1.2x)' },
-  { value: '+50%', label: '加速 (1.5x)' },
-  { value: '+100%', label: '快速 (2.0x)' }
+  { value: '+0%', labelZh: '正常速度 (1.0x)', labelEn: 'Normal (1.0x)', labelVi: 'Bình thường (1.0x)' },
+  { value: '+20%', labelZh: '轻微加速 (1.2x)', labelEn: 'Slightly Fast (1.2x)', labelVi: 'Hơi nhanh (1.2x)' },
+  { value: '+50%', labelZh: '加速 (1.5x)', labelEn: 'Fast (1.5x)', labelVi: 'Nhanh (1.5x)' },
+  { value: '+100%', labelZh: '快速 (2.0x)', labelEn: 'Very Fast (2.0x)', labelVi: 'Rất nhanh (2.0x)' }
 ]
 
 export const TTS_VOICES = [
-  { value: 'zh-CN-YunxiNeural', label: '云希 (男声)', preview: '男' },
-  { value: 'zh-CN-XiaoxiaoNeural', label: '晓晓 (女声)', preview: '女' },
-  { value: 'zh-CN-YunyangNeural', label: '云扬 (男声)', preview: '男' },
-  { value: 'zh-CN-XiaoyiNeural', label: '晓伊 (女声)', preview: '女' }
+  { value: 'zh-CN-YunxiNeural', labelZh: '云希 (男声)', labelEn: 'Yunxi (Male)', labelVi: 'Vân Hy (Nam)', preview: '男' },
+  { value: 'zh-CN-XiaoxiaoNeural', labelZh: '晓晓 (女声)', labelEn: 'Xiaoxiao (Female)', labelVi: 'Hiểu Hiểu (Nữ)', preview: '女' },
+  { value: 'zh-CN-YunyangNeural', labelZh: '云扬 (男声)', labelEn: 'Yunyang (Male)', labelVi: 'Vân Dương (Nam)', preview: '男' },
+  { value: 'zh-CN-XiaoyiNeural', labelZh: '晓伊 (女声)', labelEn: 'Xiaoyi (Female)', labelVi: 'Hiểu Y (Nữ)', preview: '女' }
 ]
 
-export const ART_STYLES = [
+export interface ArtStyle {
+  value: string
+  labelZh: string
+  labelEn: string
+  labelVi: string
+  preview: string
+  promptZh: string
+  promptEn: string
+  promptVi: string
+}
+
+export const ART_STYLES: ArtStyle[] = [
   {
     value: 'american-comic',
-    label: '漫画风',
+    labelZh: '漫画风',
+    labelEn: 'American Comic',
+    labelVi: 'Phong cách Mỹ',
     preview: '漫',
     promptZh: '日式动漫风格',
-    promptEn: 'Japanese anime style'
+    promptEn: 'Japanese anime style',
+    promptVi: 'Phong cách anime Nhật Bản'
   },
   {
     value: 'chinese-comic',
-    label: '精致国漫',
+    labelZh: '精致国漫',
+    labelEn: 'Chinese Comic',
+    labelVi: 'Truyện tranh TQ',
     preview: '国',
     promptZh: '现代高质量漫画风格，动漫风格，细节丰富精致，线条锐利干净，质感饱满，超清，干净的画面风格，2D风格，动漫风格。',
-    promptEn: 'Modern premium Chinese comic style, rich details, clean sharp line art, full texture, ultra-clear 2D anime aesthetics.'
+    promptEn: 'Modern premium Chinese comic style, rich details, clean sharp line art, full texture, ultra-clear 2D anime aesthetics.',
+    promptVi: 'Phong cách truyện tranh Trung Quốc hiện đại cao cấp, chi tiết phong phú, nghệ thuật đường nét sắc sảo sạch sẽ, kết cấu đầy đủ, thẩm mỹ anime 2D siêu rõ nét.'
   },
   {
     value: 'japanese-anime',
-    label: '日系动漫风',
+    labelZh: '日系动漫风',
+    labelEn: 'Japanese Anime',
+    labelVi: 'Anime Nhật',
     preview: '日',
     promptZh: '现代日系动漫风格，赛璐璐上色，清晰干净的线条，视觉小说CG感。高质量2D风格',
-    promptEn: 'Modern Japanese anime style, cel shading, clean line art, visual-novel CG look, high-quality 2D style.'
+    promptEn: 'Modern Japanese anime style, cel shading, clean line art, visual-novel CG look, high-quality 2D style.',
+    promptVi: 'Phong cách anime Nhật Bản hiện đại, đổ bóng cel, nghệ thuật đường nét sạch sẽ, giao diện CG tiểu thuyết trực quan, phong cách 2D chất lượng cao.'
   },
   {
     value: 'realistic',
-    label: '真人风格',
+    labelZh: '真人风格',
+    labelEn: 'Realistic',
+    labelVi: 'Ảnh thật',
     preview: '实',
     promptZh: '真实电影级画面质感，真实现实场景，色彩饱满通透，画面干净精致，真实感',
-    promptEn: 'Realistic cinematic look, real-world scene fidelity, rich transparent colors, clean and refined image quality.'
+    promptEn: 'Realistic cinematic look, real-world scene fidelity, rich transparent colors, clean and refined image quality.',
+    promptVi: 'Giao diện điện ảnh thực tế, độ trung thực của cảnh thế giới thực, màu sắc trong suốt phong phú, chất lượng hình ảnh sạch sẽ và tinh tế.'
   }
 ]
 
@@ -163,12 +186,43 @@ export const ART_STYLES = [
  */
 export function getArtStylePrompt(
   artStyle: string | null | undefined,
-  locale: 'zh' | 'en',
+  locale: 'zh' | 'en' | 'vi',
 ): string {
   if (!artStyle) return ''
   const style = ART_STYLES.find(s => s.value === artStyle)
   if (!style) return ''
-  return locale === 'en' ? style.promptEn : style.promptZh
+  console.log("promptVi", locale, style.promptVi)
+  if (locale === 'en') return style.promptEn
+  if (locale === 'vi') return style.promptVi || style.promptEn
+  return style.promptZh
+}
+
+/**
+ * 获取风格 label
+ */
+export function getArtStyleLabel(
+  artStyle: string | null | undefined,
+  locale: 'zh' | 'en' | 'vi',
+): string {
+  if (!artStyle) return ''
+  const style = ART_STYLES.find(s => s.value === artStyle)
+  if (!style) return artStyle || ''
+  if (locale === 'en') return style.labelEn
+  if (locale === 'vi') return style.labelVi || style.labelEn
+  return style.labelZh
+}
+
+/**
+ * 获取通用 label
+ */
+export function getLocalizedLabel(
+  option: any,
+  locale: 'zh' | 'en' | 'vi',
+): string {
+  if (!option) return ''
+  if (locale === 'en') return option.labelEn || option.label || ''
+  if (locale === 'vi') return option.labelVi || option.labelEn || option.label || ''
+  return option.labelZh || option.label || ''
 }
 
 // 角色形象生成的系统后缀（始终添加到提示词末尾，不显示给用户）- 左侧面部特写+右侧三视图

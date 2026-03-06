@@ -1,0 +1,18 @@
+{
+    "storyboard": "Bản phác thảo",
+    "storyboard_candidate": "Ứng viên Bản phác thảo",
+    "character": "Nhân vật",
+    "location": "Bối cảnh",
+    "video": "Video",
+    "analyze": "Phân tích",
+    "analyze_character": "Phân tích Nhân vật",
+    "analyze_location": "Phân tích Bối cảnh",
+    "clips": "Tách Clip",
+    "storyboard_text_plan": "Kế hoạch Phác thảo",
+    "storyboard_text_detail": "Chi tiết Bản phác thảo",
+    "tts": "Chuyển Văn bản thành Giọng nói",
+    "regenerate": "Tạo lại",
+    "voice-generate": "Tạo Giọng nói",
+    "voice-design": "Thiết kế Giọng nói",
+    "lip-sync": "Khớp khẩu hình"
+}

@@ -6,6 +6,9 @@ import type { VideoPricingTier } from '@/lib/model-pricing/video-tier'
 export interface VideoModelOption {
   value: string
   label: string
+  labelZh?: string
+  labelEn?: string
+  labelVi?: string
   provider?: string
   providerName?: string
   disabled?: boolean

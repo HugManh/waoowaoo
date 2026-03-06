@@ -1,59 +1,59 @@
-# 03 事件协议与时钟
+# 03 Giao thức Sự kiện và Đồng hồ thời gian (Event Protocol & Clock)
 
-## RunEventV2 事件类型
+## Các loại Sự kiện trong RunEventV2
 
-- `run.start`
-- `step.start`
-- `step.chunk`
-- `step.complete`
-- `step.error`
-- `run.complete`
-- `run.error`
-- `run.canceled`
+- `run.start` (Bắt đầu đợt Run)
+- `step.start` (Bắt đầu chặng Step)
+- `step.chunk` (Mảnh vỡ stream từ Step)
+- `step.complete` (Hoàn thành Step)
+- `step.error` (Step vướng lỗi)
+- `run.complete` (Hoàn thành trọn vẹn Run)
+- `run.error` (Run vướng lỗi)
+- `run.canceled` (Lệnh Run bị hủy)
 
-## 统一字段
+## Cấu trúc Trường chuẩn hóa (Unified Fields)
 
-- `runId`
-- `projectId`
-- `userId`
-- `seq`（仅持久化后的 run event 有）
-- `eventType`
-- `stepKey`（step 事件）
-- `attempt`（step 事件）
-- `lane`（chunk 事件：`text|reasoning`）
-- `payload`
-- `createdAt`
+- `runId` (Mã định danh của dải Run)
+- `projectId` (Mã Dự án)
+- `userId` (Mã Người dùng)
+- `seq` (Chỉ số thứ tự đếm duy nhất, chỉ hiển thị đối với những run event đã chốt lưu trữ bền vững persistent xuống DB)
+- `eventType` (Loại sự kiện)
+- `stepKey` (Mã Key của Step - dành riêng cho hệ step event)
+- `attempt` (Lượt thử - dành riêng cho hệ step event)
+- `lane` (Phân luồng đối với mảng chunk event: Gồm `text|reasoning`)
+- `payload` (Gói hàng vận chuyển dữ liệu chính)
+- `createdAt` (Mốc thời gian khởi tạo)
 
-## task -> run 映射规则（当前实现）
+## Bộ Quy tắc móc nối (Mapping) chuyển dịch từ task -> run (Cơ chế đang vận hành)
 
-来源：`src/lib/run-runtime/task-bridge.ts`
+Nguồn chiếu: `src/lib/run-runtime/task-bridge.ts`
 
-1. `task.lifecycle + task.created` -> `run.start`
-2. `task.lifecycle + task.processing` -> `step.start`
-3. `task.stream` -> `step.chunk`
-4. `task.lifecycle + task.processing + done/stage=complete` -> `step.complete`
-5. `task.lifecycle + task.processing + stage=error or payload.error` -> `step.error`
-6. `task.lifecycle + task.completed` -> `step.complete` + `run.complete`
-7. `task.lifecycle + task.failed` -> `step.error` + `run.error`
+1. `task.lifecycle + task.created` -> chiếu sang -> `run.start`
+2. `task.lifecycle + task.processing` -> chiếu sang -> `step.start`
+3. `task.stream` -> chiếu sang -> `step.chunk`
+4. `task.lifecycle + task.processing + done/stage=complete` -> chiếu sang -> `step.complete`
+5. `task.lifecycle + task.processing + stage=error hoặc payload.error` -> chiếu sang -> `step.error`
+6. `task.lifecycle + task.completed` -> chiếu sang chốt hạ -> `step.complete` + `run.complete`
+7. `task.lifecycle + task.failed` -> chiếu sang báo tử -> `step.error` + `run.error`
 
-补充规则：
+Luật bổ sung kẹp kèm:
 
-- stream 缺失 `stepId` 时，fallback 为 `step:${taskType}`。
-- `runId` 可从 payload 或 payload.meta 提取。
+- Nếu lỡ nhịp stream bị rỗng thiếu mất `stepId`, thì hệ thống tự fallback vá mù thành `step:${taskType}`.
+- Có thể tách bóc chiết xuất thông số `runId` đè móc từ thẳng trong `payload` hoặc từ hộc `payload.meta`.
 
-## 顺序保障
+## Bức tường phòng thủ Trật tự Giao trễ (Order Guarantee)
 
-- 后端：`(runId, seq)` 唯一，按 seq 查询。
-- 前端：只应按 seq 前进应用事件；重复 seq 应跳过。
+- Mặt trận phía sau (Backend): Kẹp nêm liên danh `(runId, seq)` trở lên Độc Nhất, và dùng chính gọng kéo seq làm thang chỉ mục truy vấn (query by seq).
+- Mặt trận tiền phương (Frontend): Mọi sự kiện tiếp thụ chạy ứng dụng Bắt Buộc phải tiến bước tịnh tiến bám sát mũi dao seq; Nếu như có đụng độ lặp nhại một vạch seq nào, ngay lập tức đá hất văng (skip).
 
-## 跳号处理（目标语义）
+## Nghệ Thuật Ứng Phó hụt mạng nhảy số (Gap/Skip Sequence Resolution - Mục Tiêu Sắp Tới)
 
-当收到事件 `seq > lastSeq + 1`：
+Khi tay lưới kéo nhằm một lưới sự kiện lạ lùng báo lỗi nhịp hụt: `seq > lastSeq + 1`:
 
-1. 立即触发 `GET /api/runs/:id/events?afterSeq=lastSeq`
-2. 先补齐缺失段，再应用实时事件
+1. Không rề rà, nổ súng đánh úp một phát bắn tức thì bằng đường gọi `GET /api/runs/:id/events?afterSeq=lastSeq`
+2. Ưu tiên vá dập bịt lỗ hổng móc đủ mảnh đã mất mác rồi mới tính đường lướt chạy ráp chuỗi sự kiện realtime đang trào ra tiếp.
 
-当前状态：
+Tình hình thực tiễn:
 
-- 前端已接入 run 增量拉取；
-- “显式 gap 检测 + 自动补拉”仍在收口中（见 `08-open-gaps.md`）。
+- Hiện tại trận địa phía trước (Frontend) đã mấp mé nhập sòng luồng cơ chế kéo dồi kéo dập gia tăng tích hợp sự kiện từ run rồi;
+- Chiêu thức "Xoi xét rà soát chủ động (Explicit gap detection) + tự kéo căng bù sụp (Auto complement/pull)" thì vẫn còn dang dở ngâm háng xó góc (Hỏi thêm trong tập `08-open-gaps.md`).

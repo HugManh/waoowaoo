@@ -1,0 +1,15 @@
+{
+    "transactionType": "Loại Giao dịch",
+    "startDate": "Ngày Bắt đầu",
+    "endDate": "Ngày Kết thúc",
+    "all": "Tất cả",
+    "income": "Thu nhập",
+    "expense": "Chi phí",
+    "reset": "Đặt lại",
+    "filter": "Lọc",
+    "noRecords": "Không có dữ liệu",
+    "accountRecharge": "Nạp tiền",
+    "serviceConsumption": "Tiêu dùng Dịch vụ",
+    "balance": "Số dư",
+    "allTypes": "Tất cả"
+}

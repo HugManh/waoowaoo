@@ -1,109 +1,107 @@
-你必须按照目前的md文件详细执行我们的代码修改计划，且必须时刻关注，维护本次md文档，确保该文档能始终保持最新，和我们代码库保持完全一致，除非用户要求，否则默认禁止打补丁，禁止兼容层，我们需要的是简洁干净可扩展的系统，我们这个系统目前没有人用，可以一次性全量，彻底，不留遗留的修改，并且需要一次性完成所有，禁止停下，禁止自己停止任务，一次性完成所有内容。
+# 1: Mục tiêu Dự án
 
-# 1:项目目标
+## Mục tiêu Cốt lõi
+- Hợp nhất toàn bộ các tác vụ AI vào một Môi trường thực thi (Runtime) duy nhất: `LangGraph + AI SDK + MySQL Checkpointer`.
+- Giữ nguyên hiện trạng của các API không liên quan đến AI, tránh cải tạo không cần thiết.
+- Đồng bộ hóa các luồng xử lý trạng thái, tự động thử lại (retry), hủy bỏ (cancel), phát lại (replay), ghi log và cú pháp báo lỗi nhằm xóa bỏ xung đột do hệ thống đang tồn tại chạy dựa trên nhiều mô hình thực thi khác nhau.
 
-## 核心目标
-- 统一所有 AI 任务到单一运行时：`LangGraph + AI SDK + MySQL Checkpointer`。
-- 保留非 AI 接口现状，避免无效改造。
-- 统一状态、重试、取消、回放、日志、错误语义，消除多套执行模型冲突。
+## Lý do thực hiện
+- Hiện tại, hệ thống chạy song song quá nhiều mô hình thực thi và mô hình quản lý trạng thái, dẫn tới các hệ lụy:
+  - Trạng thái giữa các bước thi hành bị ghi đè, sai lệch vị trí hoặc bị lặp lại.
+  - Các cấp độ retry tự cắn xé lẫn nhau (Vừa retry trên hàng đợi, vừa tự retry trong bước xử lý, cộng thêm retry lúc parse dữ liệu).
+  - Phía giao diện (frontend) phải tự còng lưng gánh thêm các mảng code đắp vá gộp lỗi (Điển hình như tự cắt mã fix hậu tố stepId khi retry).
+  - Chi phí và thời gian đào truy tìm nguyên nhân lỗi (troubleshoot) rất cao.
 
-## 为什么做
-- 目前系统存在多套执行与状态模型并行，导致：
-  - 步骤状态覆盖/错位/重复。
-  - 重试层级打架（队列重试、步骤重试、解析重试）。
-  - 前端需要补丁式归并逻辑（如 stepId 重试后缀解析）。
-  - 故障定位成本高。
+## Ràng buộc Cứng (Bắt buộc phải thỏa mãn)
+- A. Tối giảm State (State 瘦身): State chỉ được quyền mang siêu dữ liệu (metadata) và mã tham chiếu cơ sở dữ liệu (DB refs), nghiêm cấm lưu trữ các đoạn văn bản khổng lồ.
+- B. Đồng hồ logic (Logic Clock): Bộ phát mã đếm `graph_events.seq` phải đếm tiến liên tục không lùi; hễ frontend bắt được dấu hiệu nhảy số (mất chuỗi), phải ngay lập tức chạy code bù lấp bằng cách lấy lại `afterSeq`.
 
-## 强约束（必须满足）
-- A. State 瘦身：State 只存 metadata 和 DB refs，不存大文本正文。
-- B. 逻辑时钟：`graph_events.seq` 单调递增；前端发现跳号即补拉 `afterSeq`。
+## Kỳ vọng Trước và Sau chuyển đổi
+- Trước khi đổi: Lệnh thi hành, sự kiện truyền phát liên tục (stream), tính năng phát lại và cơ chế gom móc trạng thái rơi vung vãi qua nhiều hệ lưu trữ.
+- Sau khi đổi: Trở thành một khối "Unified Run Runtime", truy xuất tại một Điểm Chân Lý duy nhất, với một bộ khung quy chế sự kiện và cơ chế phục hồi được chuẩn hóa.
 
-## 修改前后预期
-- 修改前：任务执行、流式事件、回放与状态聚合分散在多层。
-- 修改后：统一 Run Runtime，单一事实源，统一事件协议与恢复机制。
+## Ước lượng Quy mô Chỉnh sửa (Cập nhật động)
+- Số lượng tệp tin (files) dự kiến: 75-105 tệp.
+- Số dòng code (lines) dự kiến: 8000-13000 dòng.
+- Sổ tệp đã tiến hành sửa đổi hiện tại: 26 tệp (Cộng dồn qua kỳ này, bao gồm runtime/service/bridge/worker/frontend hooks/regression test/Tập tài liệu).
 
-## 预计改动规模（动态更新）
-- 预计文件：75-105
-- 预计代码行：8000-13000
-- 当前已改动文件：26（本轮累计，含 runtime/service/bridge/worker/前端运行钩子/回归测试/文档集）
+# 2: Tiến độ Các Giai đoạn + Vị trí Mã Code Sửa tương ứng
 
-# 2:阶段+具体代码修改地方以及需要修改的内容
+## Quản lý Tổng quan Các Giai Đoạn 
+- ✅ Giai đoạn 1 (Phase 1): Đã chốt phương án Thiết kế Kiến trúc (LangGraph + AI SDK + MySQL Checkpointer; Chỉnh lại một mối áp dụng toàn dải AI, còn ngoại tuyến phi-AI giữ nguyên).
+- ✅ Giai đoạn 2 (Phase 2): Khởi tạo Tổng Tài liệu Chỉ huy (Master Plan) và duy trì bảo tàng liên tục.
+- ✅ Giai đoạn 3 (Phase 3): Xây bộ khung xương Runtime + Áp các mô hình `graph_*` mới cho nhánh Prisma.
+- ✅ Giai đoạn 4 (Phase 4): Chốt mã Run API (`/api/runs`).
+- ✅ Giai đoạn 5 (Phase 5): Mạch số nhịp logic `seq` + Luồng thuật toán bù đắp khi nhảy thiếu số bên phía Frontend.
+- 🔄 Giai đoạn 6 (Phase 6): Bề mặt thống nhất AI SDK (Đã nhổ và cấy xong nhánh lõi chính, còn lại đang gom những ngõ tác vụ lẻ tẻ).
+- 🔄 Giai đoạn 7 (Phase 7): Xử lý GraphExecutor + Cặp đôi QuickRunGraph/PipelineGraph (Đã đặt nền móng và nối vào huyết mạch lõi).
+- 🔄 Giai đoạn 8 (Phase 8): Chuyển khẩu (Migration) cho các kịch bản dài kỳ, phức tạp (story_to_script_run / script_to_storyboard_run).
+- ⏸ Giai đoạn 9 (Phase 9): Hoàn thiện di dời cuốn chiếu cho tất thảy các tác vụ AI còn sót lại.
+- 🔄 Giai đoạn 10 (Phase 10): Tổng vệ sinh luồng mã thực thi cũ cõi và Giao thức sự kiện tiền nhiệm (Dọn rác code tiến hành linh hoạt liên tục).
+- ⚠️ Cảnh báo Rủi ro (Phase Risk): "Sang sông" cùng một lúc tất tần tật là một chuyện vô cùng mạo hiểm, do đó lệnh cấm dứt khoát phải khép cửa khóa chặn qua mỗi chặng đường (gatekeeping) mới bước tiếp.
 
-## 阶段总览状态
-- ✅ Phase 1: 架构决策已锁定（LangGraph + AI SDK + MySQL Checkpointer；AI 全量统一，非 AI 不改）
-- ✅ Phase 2: 主控文档建立并进入持续维护
-- ✅ Phase 3: Runtime 骨架 + Prisma graph_* 模型
-- ✅ Phase 4: Run API（/api/runs）
-- ✅ Phase 5: 事件 seq 逻辑 + 前端跳号补拉
-- 🔄 Phase 6: AI SDK 统一层（核心链路已切，长尾任务待收口）
-- 🔄 Phase 7: GraphExecutor + QuickRunGraph/PipelineGraph（已落地并接入核心链路）
-- 🔄 Phase 8: 复杂链路迁移（story_to_script_run / script_to_storyboard_run）
-- ⏸ Phase 9: 其余 AI 任务全量迁移
-- 🔄 Phase 10: 清理旧执行路径与旧事件协议（代码清理持续进行）
-- ⚠️ Phase Risk: 一次性切换风险高，必须严格按阶段门禁推进
+## Giai đoạn 2 (Đang vận hành) - Tổng Tài Liệu Chỉ Đạo (Master Plan)
+- 🔄 Tác vụ: Soạn thảo và bảo dưỡng cuốn chỉ nam "Cẩm nang Quyết Thư".
+  - Đường dẫn tệp: `docs/AI_RUNTIME_UNIFICATION_EXECUTION_MASTER_PLAN.md`
+  - Yêu cầu quy chuẩn: Cứ mỗi nhát quốc phập xuống sửa thêm bớt dòng code nào, tài liệu này bắt buộc phải là nơi được update trang thái lên dòng sớm nhất, rồi mới được phép dấn thân đi tiếp.
 
-## Phase 2（当前执行中）主控文档
-- 🔄 任务：创建并维护唯一执行文档
-  - 路径：`docs/AI_RUNTIME_UNIFICATION_EXECUTION_MASTER_PLAN.md`
-  - 要求：每次代码变更后先更新本文件状态，再继续下一步。
+## Giai đoạn 3 (Phase 3) - Cột trụ Runtime & Sơ đồ hóa Dữ liệu
+- ✅ Tác vụ: Rót thêm mô hình bảng vào Prisma cùng mạng lưới Index.
+  - Tệp chỉnh sửa: `prisma/schema.prisma`
+  - Mô hình được đổ vô: `graph_runs`, `graph_steps`, `graph_step_attempts`, `graph_events`, `graph_checkpoints`, `graph_artifacts`
+  - Đòi hỏi cam kết:
+    - Bảng `graph_events` chèn thêm thẻ bài `seq`, đóng đinh duy nhất với cặp chìa khóa hợp thể bọc lót `(run_id, seq)`.
+    - Bảng `graph_runs` gắn kèm `last_seq` để đáp ứng đà tịnh tiến nối dây con số cho từng chuỗi run.
+    - Cột `graph_runs.taskId` bắc cầu ràng buộc chiếu xạ Duy nhất 1-1 ghép cặp (run <-> task), trợ giúp thu lệnh Hủy và Theo dấu (tracking).
+- ✅ Tác vụ: Mở lớp Type chỉ định và Dịch vụ (Service) cho bộ Run
+  - File: `src/lib/run-runtime/types.ts`
+  - File: `src/lib/run-runtime/service.ts`
+  - File: `src/lib/run-runtime/publisher.ts`
+  - File: `src/lib/run-runtime/task-bridge.ts`
+  - File: `src/lib/run-runtime/workflow.ts`
+  - Sức mạnh mang tới:
+    - Hàm gọi createRun/getRun/requestCancel/listEventsAfterSeq/appendEventWithSeq.
+    - Bộ công cụ phóng tin sự kiện Run event publish + cầu nối kiều hối sự kiện task event bridge.
+    - Bộ bảo vệ trần rào bùng nổ Size cho State (64KB).
+- ⚠️ Cảnh báo Rủi ro: Quá trình sửa đổi cấu trúc DDL xen ngang với tập bảng đang chạy vắt chân lên cổ cho cao điểm tương tác hệ thống. Trị tuyệt đối khung cửa lưu chuyển Migration và sắp lịch tạo Index cho nhịp nhàng.
 
-## Phase 3 运行时骨架与数据模型
-- ✅ 任务：新增 Prisma 模型与索引
-  - 文件：`prisma/schema.prisma`
-  - 新增：`graph_runs`, `graph_steps`, `graph_step_attempts`, `graph_events`, `graph_checkpoints`, `graph_artifacts`
-  - 要求：
-    - `graph_events` 包含 `seq`，并约束 `(run_id, seq)` 唯一。
-    - `graph_runs` 包含 `last_seq` 以支持 run 内递增序列。
-    - `graph_runs.taskId` 建立唯一映射（run <-> task），用于取消与追踪。
-- ✅ 任务：新增 Run 类型与服务
-  - 文件：`src/lib/run-runtime/types.ts`
-  - 文件：`src/lib/run-runtime/service.ts`
-  - 文件：`src/lib/run-runtime/publisher.ts`
-  - 文件：`src/lib/run-runtime/task-bridge.ts`
-  - 文件：`src/lib/run-runtime/workflow.ts`
-  - 能力：
-    - createRun/getRun/requestCancel/listEventsAfterSeq/appendEventWithSeq
-    - run event publish + task event bridge
-    - State 大小守卫（64KB）
-- ⚠️ 风险：DDL 与现有高并发表并存，需控制迁移窗口与索引创建顺序。
+## Giai đoạn 4 (Phase 4) - Cổng Giao Tiếp (Run API)
+- ✅ Tác vụ: Nới rộng các đường Route chạy cổng Interface. 
+  - `src/app/api/runs/route.ts` -> sinh đường cổng `POST /api/runs`, `GET /api/runs`
+  - `src/app/api/runs/[runId]/route.ts` -> sinh đường cổng `GET /api/runs/:runId`
+  - `src/app/api/runs/[runId]/events/route.ts` -> sinh đường cổng `GET /api/runs/:runId/events?afterSeq=`
+  - `src/app/api/runs/[runId]/cancel/route.ts` -> sinh đường cổng `POST /api/runs/:runId/cancel`
 
-## Phase 4 Run API
-- ✅ 任务：新增运行接口
-  - `src/app/api/runs/route.ts` -> `POST /api/runs`, `GET /api/runs`
-  - `src/app/api/runs/[runId]/route.ts` -> `GET /api/runs/:runId`
-  - `src/app/api/runs/[runId]/events/route.ts` -> `GET /api/runs/:runId/events?afterSeq=`
-  - `src/app/api/runs/[runId]/cancel/route.ts` -> `POST /api/runs/:runId/cancel`
-
-## Phase 5 逻辑时钟与跳号补拉
-- ✅ 任务：运行时事件序列
-  - 文件：`src/lib/run-runtime/service.ts`
-  - 要求：事务内分配 seq、写事件、更新 run.last_seq。
-- ✅ 任务：worker 事件 runId 透传
-  - 文件：`src/lib/workers/shared.ts`
-  - 说明：`withFlowFields` 已统一注入 `runId`（来自 payload/meta），确保 processing/progress/stream/completed/failed 全链路可桥接到 run 事件。
-- ✅ 任务：task->run 事件桥接增强（progress 感知）
-  - 文件：`src/lib/run-runtime/task-bridge.ts`
-  - 说明：`task.progress` 事件已支持基于 `stage/done/error` 推导 `step.complete/step.error`，并统一 `stepKey`、`attempt`、lane 解析规则；stream 场景增加默认 `step:${taskType}` 键防止丢片段。
-- ✅ 任务：run/step 终态投影收敛
-  - 文件：`src/lib/run-runtime/service.ts`
-  - 说明：`run.complete/run.error/run.canceled` 会批量收敛未终态 step；并完善错误消息解析（含嵌套 error.message）与运行中状态推进，减少“run 终态但 step 仍 running”矛盾。
-- ✅ 任务：桥接规则回归测试
-  - 文件：`tests/unit/run-runtime/task-bridge.test.ts`
-  - 覆盖：stream lane 归一、stream 缺失 stepId 的 fallback stepKey、processing done/error 推导、completed 映射、缺失 runId 拦截。
-- 🔄 任务：前端消费路径切入 run seq 拉取
-  - 文件：`src/lib/query/hooks/run-stream/run-request-executor.ts`
-  - 说明：当接口返回 `runId` 时，前端优先走 `/api/runs/:runId/events?afterSeq=` 递增拉取，按 seq 单调推进；task SSE 保留为无 runId 场景兜底。
-- ✅ 任务：run events 拉流路径单测
-  - 文件：`tests/unit/helpers/run-request-executor.run-events.test.ts`
-  - 覆盖：`async + runId` 返回后改走 `/api/runs/:runId/events` 并产出终态。
-- ✅ 任务：state-machine 保留 run.start payload
-  - 文件：`src/lib/query/hooks/run-stream/state-machine.ts`
-  - 说明：`run.start` 事件会落盘 payload，后续恢复和调试可读取 `taskId/runId` 元信息。
-- 🔄 任务：前端消费顺序保障
-  - 文件：`src/lib/query/hooks/run-stream/*`（将迁移到 RunStoreV2）
-  - 要求：发现 seq 跳号即补拉并去重。
-- ✅ 任务：story/script 前端运行流改为 run-event 单通道
-  - 文件：
+## Giai đoạn 5 (Phase 5) - Nhịp Logic Clock và Cơ Chế Kéo Bù Mất Số
+- ✅ Tác vụ: Giăng lưới chuỗi số tuần hoàn nhịp điệu Runtime event.
+  - File: `src/lib/run-runtime/service.ts`
+  - Cam kết: Nằm gọn gàng trong khuôn khổ 1 kịch bản (transaction) sẽ lo liệu khoán chia `seq`, tự ném viết event, cập nhật chỉ số cọc thẻ `run.last_seq`.
+- ✅ Tác vụ: Lưu truyền mã `runId` xuyên không thông qua lưới sự kiện Worker.
+  - File: `src/lib/workers/shared.ts`
+  - Diễn giải: Cây cầu `withFlowFields` đã bị ép tẩm thêm chất làm duy nhất `runId` (chuốt ra từ thân payload/meta), bọc đường ranh giới xác nhận suốt dòng đời cho processing/progress/stream/completed/failed để tìm về quê quán nguồn lội run event.
+- ✅ Tác vụ: Độ nòng pháo cho lưới kiều hối task->run event (Nhận dạng progress).
+  - File: `src/lib/run-runtime/task-bridge.ts`
+  - Diễn giải: Sự kiện tiến độ `task.progress` nay đã phán đoán thông minh dựa trên logic tệp `stage/done/error` để ép ra khuôn kết tinh `step.complete/step.error`, và ấn định pháp lệnh quy nhất chỉ một cho cách móc tách giá trị `stepKey` / `attempt` / phân luồng mã lane. Khu vực truyền tải stream được nhồi nắp đóng phòng rủi ro với chốt ngàm mặc định `step:${taskType}` rơi đổ mất thông tin mảnh vỡ.
+- ✅ Tác vụ: Thu bén đúc kết lại các cực điểm đích (Run/step 终态投影收敛).
+  - File: `src/lib/run-runtime/service.ts`
+  - Diễn giải: Phát lệnh bài khi kết sổ `run.complete/run.error/run.canceled` sẽ ôm theo bồi đắp tổng thu gom hàng sỉ những step đang trôi vất vưởng do chưa bắt chốt đích; củng cố khâu gỡ não và bung giải mã thệp thư báo lỗi (xuyên chèn tận Error message bị vùi lấp tầng nhánh trong) để đốc thúc dập tiến độ của trạng thái running đởn, né tiếng lóng "Run thì đòi thăng ván trích sổ mà mớ step vẫn ngâm giấm rướn sức Running."
+- ✅ Tác vụ: Test hồi quy vòng xuyến kiểm sát quy củ bộ quy tắc Kiều Hối.
+  - File: `tests/unit/run-runtime/task-bridge.test.ts`
+  - Lưới che phủ độ mượt (coverage): San mượt làn luồng Stream lane, bù mã khoá Key `stepKey` xài lấp hố mìn cho lằn stream bị mất tích `stepId`, thông nòng trích tinh tiến độ xử lý processing done/error, ánh xạ map theo complete, tự bật màn chắn lọc rác đối với ngạch khuyết `runId` tơ hơ.
+- 🔄 Tác vụ: Điều chuỗi điều hưởng luồng bắt mồi lấy seq phía Frontend.
+  - File: `src/lib/query/hooks/run-stream/run-request-executor.ts`
+  - Diễn giải: Khi đầu cắm cổng phản hồi giắt sẵn `runId` vào túi, Frontend sẽ ưu tiên chạy thẳng đại lộ `/api/runs/:runId/events?afterSeq=` để vét kéo nhặt tăng dồn tiến triển đơn điệu qua từng `seq`. Cánh cửa phập phòng SSE của Task dẹp lui làm phương án sơ cua che gió cho luồng nghèo hột ngọc `runId`.
+- ✅ Tác vụ: Viết bài test sấy khâu luồng dòng chảy run events (Pull stream)
+  - File: `tests/unit/helpers/run-request-executor.run-events.test.ts`
+  - Phủ nắp bưng lưới: Hễ mà cục cưng `async + runId` báo đậu điểm danh thì thét lùi chuyển nẻo đi thẳng qua `/api/runs/:runId/events` và nặn ép phọt ra cực điểm kết bài chung cuộc (terminal state).
+- ✅ Tác vụ: Bộ não State-machine găm giữ của cải payload khai vận `run.start`
+  - File: `src/lib/query/hooks/run-stream/state-machine.ts`
+  - Chi tiết: Biến cố phất buồm khai chiến `run.start` sẽ làm động tác châm ngòi thò tay gieo cắm rơi xuống mặt đĩa tệp thân payload, để hậu thế mần công tác rã đông (restore/debug) sẽ nắm trong tay đục khoét xem tận cốt nguồn thông tin siêu nhân `taskId/runId`.
+- 🔄 Tác vụ: Bảo hành chống lộn xộn luồng trật tự tiêu nạp phía Front-end
+  - Di dời File: Mảng vùng vẫy `src/lib/query/hooks/run-stream/*` (Vén rèm bê về đại bản doanh tủ kính mới mang tên RunStoreV2)
+  - Đòi hỏi: Lệnh lùng quét săn phát lệnh truy nã, thấy văng số lòi sẹo seq là thợ máy nhào vào móc vớt liền, tròng sẵn máy gọt rác loại trùng lắp.
+- ✅ Tác vụ: Thay áo dỡ rã thay dây nhợ luồng điều hướng chạy của mạch Mấu Truyện (Story/script) đổi thuần giao thức kênh độc tôn chạy ngầm của Run-event
+  - File:
     - `src/lib/query/hooks/run-stream/run-request-executor.ts`
     - `src/lib/query/hooks/run-stream/recovered-run-subscription.ts`
     - `src/lib/query/hooks/run-stream/run-stream-state-runtime.ts`
@@ -111,24 +109,24 @@
     - `src/lib/query/hooks/useScriptToStoryboardRunStream.ts`
     - `src/app/[locale]/workspace/[projectId]/modes/novel-promotion/hooks/useWorkspaceExecution.ts`
     - `src/app/[locale]/workspace/[projectId]/modes/novel-promotion/hooks/useNovelPromotionWorkspaceController.ts`
-  - 说明：移除 story/script 的 task SSE 兜底，恢复与执行统一为 `/api/runs/:runId/events` 轮询与 seq 补拉；停止动作改为 `/api/runs/:runId/cancel`。
-- ⚠️ 风险：实时流与补拉流重复事件导致状态回退，必须基于 seq 去重。
+  - Đọc diễn văn: Vứt sọt rác cởi trói cái nịt đứt chỉ sơ cua sse task-steamer của nhóm nhà Mấu truyện/Kịch bản (Story/script). Đã ấn định ốp luật quy y cho phương thức mưu trí hồi trần - thi hành qua kênh hỏi đáp vòng `/api/runs/:runId/events` luân hồi cùng mớ lưới bắt số lụm bù thẻ díp `seq`. Kệnh bấm ngừng phanh dẹp cửa phải qua thẳng trạm `/api/runs/:runId/cancel`.
+- ⚠️ Nỗi khiếp sợ rủi ro: Đám tàn binh bầy nhầy giữa luồng Stream real-time trượt đua cùng luồng vá víu đổ rác kiện event lặp gây bầy nhầy tụt điểm số state. Kiên quyết thanh lọc ép chuẩn rà lưới tẩy trùng lắp theo díp mã số thẻ `seq`. 
 
-## Phase 6 AI SDK 统一调用层
-- ✅ 任务：新增 AI Runtime 基础层
-  - 目录：`src/lib/ai-runtime/`
-  - 文件：
+## Giai đoạn 6 (Phase 6) Tầng gọi Chung Quanh Gộp Bó Gọi Tổng Chỉ Huy AI SDK
+- ✅ Tác vụ: Bồi thềm lớp Nền Máng Xương Cốt AI Runtime
+  - Khu thư mục: `src/lib/ai-runtime/`
+  - File cấu thành:
     - `src/lib/ai-runtime/types.ts`
     - `src/lib/ai-runtime/errors.ts`
     - `src/lib/ai-runtime/client.ts`
     - `src/lib/ai-runtime/index.ts`
-  - 能力：统一 step 调用、错误归一、usage 输出结构。
-- 🔄 任务：核心链路 handler 切换到 AI Runtime
-  - 文件：
+  - Đồ chơi chức năng: Thu vào một rổ phép gọi cho các con bước step, thuần dòng quy nhất dạng thức ọc lỗi bốc phốt, nắn ép cơ cấu xuất thân bưu kiện lượng phí (usage).
+- 🔄 Tác vụ: Nắm đầu nhóm Trạm gác lính (handler) dây xích chủ chốt vặn mình đổi nài chui lên lưng gánh vác của AI Runtime
+  - Nhập trạm thư báo File:
     - `src/lib/workers/handlers/story-to-script.ts`
     - `src/lib/workers/handlers/script-to-storyboard.ts`
-- ✅ 任务：长尾文本 handler 批量切换到 AI Runtime（第一批）
-  - 文件：
+- ✅ Tác vụ: Cuộc di dân ồ ạt băng đàng đồng bộ cho lũ lính đi nhặt rác văn bản (handler) lẻ tẻ qua tay nải của trạm AI Runtime (Đợt ra quân Cánh Chim Đầu Đàn - Đợt 1)
+  - Nhập trạm thư báo File:
     - `src/lib/workers/handlers/analyze-global.ts`
     - `src/lib/workers/handlers/analyze-novel.ts`
     - `src/lib/workers/handlers/voice-analyze.ts`
@@ -137,47 +135,47 @@
     - `src/lib/workers/handlers/episode-split.ts`
     - `src/lib/workers/handlers/asset-hub-ai-modify.ts`
     - `src/lib/workers/handlers/character-profile.ts`
-- ⚠️ 风险：仍有少量旧 `llm-client` 直连点（如 shot 系列/text.worker/storyboard-phases），需继续收口。
+- ⚠️ Khe hở hồi chuông báo động Rủi ro: Đâu đó vẫn thấy khấp khiễng bóng dáng vài kẻ giấu mặt đi đánh lẻ cắm lỗ cáp đút túi đi ngõ tắt ôm nhầm chân cái trụ cũ rích nhãn mác `llm-client` (Ví lự như phe bọn dán tem Shot/ binh nhì bệt gầm text.worker, hay phi vụ nếm mật nếm gaiStoryboard-phases). Lùng mà vét bắt di dân hết cấm chừa.
 
-## Phase 7 Graph 执行器与模板
-- ✅ 任务：实现 GraphExecutor（checkpoint/retry/cancel/timeout）
-  - 文件：`src/lib/run-runtime/graph-executor.ts`
-- ✅ 任务：实现 QuickRunGraph（单节点简单任务）
-  - 文件：`src/lib/run-runtime/quick-run-graph.ts`
-- ✅ 任务：实现 PipelineGraph（复杂链路模板）
-  - 文件：`src/lib/run-runtime/pipeline-graph.ts`
-- ✅ 任务：GraphExecutor 单测
-  - 文件：`tests/unit/run-runtime/graph-executor.test.ts`
-- ⚠️ 风险：旧 `_r2` 等语义必须彻底移除，禁止新旧混用。
+## Giai đoạn 7 (Phase 7) Động cơ Executor Graph và Khung mẫu Lập Trình (Template Graph)
+- ✅ Phân nhiệm: Cho máy thổi hình đúc khuông cỗ động cơ dã thú GraphExecutor (Thêu dệt đầy đủ chiêu nộp mạng bảo hiểm giữ điểm nhớ chốt/ Tút tát xỉa tự retry lại / Húc còi kẹt bánh xe cấm vận xí cạn cancel/ Ấn kim vạch đếm bóp đồng hồ quá lữa timeout)
+  - Vị trạm đóng gạch File: `src/lib/run-runtime/graph-executor.ts`
+- ✅ Phân nhiệm: Kẻ bản rập vẽ bảng rẽ của nhánh cây tốc hành QuickRunGraph (Cho mớ nhiệm vụ cụt đuôi ruồi xẹt đụm một cái Node nhánh)
+  - Vị trạm đóng gạch File: `src/lib/run-runtime/quick-run-graph.ts`
+- ✅ Phân nhiệm: Kẻ vẽ đồ thị sơ mi dệt móc xích hệ lưu động PipelineGraph (Khung đỡ sập cho hệ liên kết rễ má lươn khươn bầy nhầy chuỗi tác vụ Pipeline)
+  - Vị trạm đóng gạch File: `src/lib/run-runtime/pipeline-graph.ts`
+- ✅ Phân nhiệm: Buồng test kiểm dịch soi độ gân guốc sầu đau cho động cơ GraphExecutor
+  - Vị trạm đóng test: `tests/unit/run-runtime/graph-executor.test.ts`
+- ⚠️ Khe hở hồi chuông báo động Rủi ro: Lũ mã ám chỉ chóp nón ngữ nghĩa lạc hậu phế tích `_r2` hoặc dây dấp đèo bòng v.v. phải đục khoét cho bay dỡ tận trốc. Miễn bàn cái chế độ làm càn đun chung nước pha tạp đồ nạc lẫn lộn đồ mới cũ.
 
-## Step Identity 统一（阶段内子任务）
-- ✅ 任务：消除动态 `stepId_retry_x` 语义，统一为 `stepId` 固定 + `stepAttempt` 递增
-  - 已完成文件：
+## Kẻ dẹp loạn Bình định Danh Tính của các Chóp Bậc (Step Identity) - Nằm trong khuôn ngạch Giai đoạn 
+- ✅ Phân nhiệm: Sát thủ vãi thuốc tẩy diệt mầm bậy bạ của thói nhảy ngáo ngữ nghĩa cái trò gán thêm cái mấu hậu tố gớm ghiếc linh hoạt của `stepId_retry_x`. Gò vô đúc khuôn một tấc chôn chết cọc cọc của `stepId` rạch ròi, kết hợp gắn mã vạch leo nấc đo nốc `stepAttempt`.
+  - Bia mộ danh thiếp những nơi đã xử tử xóa sổ thói quen dơ xong:
     - `src/lib/workers/handlers/clips-build.ts`
     - `src/lib/workers/handlers/screenplay-convert.ts`
     - `src/lib/workers/handlers/voice-analyze.ts`
     - `src/lib/workers/handlers/episode-split.ts`
     - `src/lib/novel-promotion/story-to-script/orchestrator.ts`
 
-## Phase 8 复杂链路迁移（核心）
-- ✅ 任务：`story_to_script_run` worker 主路径接入 PipelineGraph 执行器
-  - 文件：`src/lib/workers/handlers/story-to-script.ts`
-- ✅ 任务：`script_to_storyboard_run` worker 主路径接入 PipelineGraph 执行器
-  - 文件：`src/lib/workers/handlers/script-to-storyboard.ts`
-- ⏸ 任务：把“台词分析”固定建模为分镜链路步骤
-- ⚠️ 风险：产物写入幂等与回放一致性
+## Giai đoạn 8 (Phase 8) - Hàng Chữ Máu Lửa: Tàu Vượt Suối Giao Lộ Mê Vọng (Luồng Phức Hợp - Tâm điểm lõi)
+- ✅ Tác vụ nhức nhối: Buộc càng thắt cổ luồng xương sống chánh mạch xử lý tác vụ của con lính càng quét `story_to_script_run` quy chầu nối giáo vào bộ nhai điều phối PipelineGraph
+  - Tập danh File: `src/lib/workers/handlers/story-to-script.ts`
+- ✅ Tác vụ nhức nhối: Buộc càng thắt cổ luồng xương sống chánh mạch xử lý tác vụ của con lính càng quét `script_to_storyboard_run` quy chầu nối giáo vào bộ nhai điều phối PipelineGraph
+  - Tập danh File: `src/lib/workers/handlers/script-to-storyboard.ts`
+- ⏸ Chốt neo giam hạn: Tiện mưu tính đóng chuồng gông kẹp vụ án xẻ mảnh "phân tích diễn ngôn lời thoại (Voice Line Analysis)" đóng đinh cắm thành một cục Node nằm gá lên chuỗi móc nối vẽ băng chuyền dựng ảnh storyboard.
+- ⚠️ Hố lọt sinh tử rủi ro mạn phép: Đong lường sao cho cái chất đùn phụt ghi nháp sản vật đẻ ra (product output) nó đi vào cửa nại phải đạt trình đồng điệu nhất khoát, chéo cành chéo đọt ở cái mảng gọi phép tua cuộn phát lại (replay playback consistency).
 
-## Phase 9 其余 AI 任务迁移
-- ⏸ 任务：图像/视频/音频/资产中心 AI 任务统一纳管
-- ⚠️ 风险：任何 AI route 不允许旁路旧执行路径
+## Giai đoạn 9 (Phase 9) - Hốt trọn mẻ lưới đưa tụi Tác vụ AI cắp nách gom vào Rọ
+- ⏸ Bài phân ngạch: Xắn tay đóng gói gom nạp tập thể dòng họ đám AI lắt nhắt của (Vẽ ảnh Hình tướng/Chế khung nhúc nhích Video/ Khò bóp Méo mó Giọng Âm vực Voice/ Rì rào Phù thủy nhào nặn chế biến mỏ Tài sản Kho bãi AssetHub). Quây bạt dồn tụi nó đè nén vào chịu kiếp kiểm soát ôm đồng nhất của RunRuntime. 
+- ⚠️ Rào dây gai Rủi ro: Chặn tiệt đường nẻo thoái lui vẫy đuôi, KHÔNG một thằng Route API nào mang gông AI mà xí xới đào hầm trốn hủi theo cái lạch nẻo mòn lộ cũ phế truất hồi xưa vát xác thi hành ngầm. Giết không tha. 
 
-## Phase 10 清理与收口
-- ⏸ 任务：切换所有 AI 提交入口到 createRun
-- ⏸ 任务：下线旧 AI worker 执行路径与旧 task-stream 事件写入
-- ⏸ 任务：清理死代码和旧类型
-- ✅ 任务：补全运行时重构文档集与 README 入口
-  - 新增目录：`docs/ai-runtime/`
-  - 新增文件：
+## Giai đoạn 10 (Phase 10) - Cuốn mền quét rác đóng mộc chốt hạ Thu xếp
+- ⏸ Mũi đinh xuất kích: Hô hoán gặt hết mọi con kênh bóp ngòi cúng nổ của AI dời vựa rước vào cửa nhà đài `createRun`.
+- ⏸ Mũi đinh xuất kích: Ban án chém rụng cắt đuôi lột sình dìm vùi sâu cả rổ lộ giới thực thi lậu nhậu khét xẹt của công nông binh Worker AI tiền cựu. Bức tử chôn thân luôn bọn rùa lề xề giọt nước mứa task-stream cũ đang rót xối trôi tàn dư về Event write xưa cỏi.
+- ⏸ Mũi đinh xuất kích: Quét lá mã ôi thiu vứt xó rách ruột code lác thác lủng lẳng dây chết (dead code) lẫn ba cái mã phom giống dòng giống loài ẻo lả (Outdate Type defs).
+- ✅ Mũi đinh xuất kích: Cày lại nháp đấp xây lên cung điền tài liệu thánh chỉ dặn dò hậu thế ngự chỉ về cách vận dụng RunRuntime sau cơn binh biến, thêu bện kèm sợi dây dẫn nạp kéo vào cổng tam quan `README.md`
+  - Đất rọc quy hoạch thư mục: `docs/ai-runtime/`
+  - Trái tệp được ra điêu đẻ hạt:
     - `README.md`
     - `01-architecture.md`
     - `02-data-model.md`
@@ -187,45 +185,46 @@
     - `06-operations-runbook.md`
     - `07-testing-acceptance.md`
     - `08-open-gaps.md`
-  - 更新：`README.md` 添加文档入口
-- ⚠️ 风险：漏删；需关键字全仓扫描验收
+  - Treo bảng quảng cáo Update: `README.md` Dán cái bia địa chỉ chỉ nẻo mời chào lôi nhau xem gióng chiếu dẫn qua động tài liệu mới.
+- ⚠️ Con kiến đánh nổ cái đình - Rủi ro: Quên bẵng khâu dọn hốt chùi hầm phế; cần phải kích hoạt cỗ máy máy quét rọi ngõ ngách tra tấn lục xét tóm giò bâu dính (Text scanning Toàn Thân Cấu trúc Code Base) nhằm moi cho kỳ được mà kết phán tiêu diệt. 
 
-# 4:验证策略
+# 4: Chiến Bày Cách Buộc Nhận Thu Nghiệm Test 
 
-## 可量化目标
-- 状态一致性：
-  - 0 次出现“左侧已完成但主面板仍在流式输出”的矛盾状态。
-  - 0 次出现步骤重复膨胀/覆盖错位。
-- 恢复能力：
-  - 刷新恢复完整率 100%（同一 run）。
-  - 人工制造 seq 跳号后，1 次补拉内恢复完整。
-- 稳定性：
-  - 可重试错误均按策略重试；不可重试错误显式失败。
-- 观测：
-  - 每条关键日志含 `runId/stepKey/attempt`。
+## Cột mốc Định Đoạt Chốt Đếm Đóng Số
+- Độ bám đồng bộ trạng thái luồng (State Consistency):
+  - Phải giật cúp là `SỐ KHÔNG (0 Lần)` mọc ra mụn cơm phồng rộp làm trái nết cho cái trò trớ trêu: "Màn hình dọc vách dậu trái nó báo đã Đích Điểm mà ngó sang cái bản mặt thớt chính thì nó vẫn làm cái mòi thoi thóp ọc ọc phụt rỉ nước luồng stream".
+  - Phải đạt `SỐ KHÔNG (0 Lần)` trồi cái nhọt bung chỉ rách thịt đúp xì phồng làm mấy cái nấc chặn Step nó chít nghẹt rồi tự đẻ lây bịnh ra hai ba tròng lên nhau bệt bệt múa rối (trùng đè vị trí lệch pha).
+- Sinh ngực bật náp hồi sinh đội mồ (Recoverability Power):
+  - Lướt bão F5 bung fẹc nạp lại màn hình dệt phát là Móc Tóm lên sống lại lỳ 100% rành mạch y khuôn xị độ vẹn nguyên hình dáng (Trong ranh giới 1 kiếp tái sinh đồng gốc `run`).
+  - Tung tuyệt chiêu cắc cớ rút điện bóp chết đứt nửa nòng mảng nhảy hụt số seq của phe con người, bảo độ chỉ trong `1 cú lôi kéo補拉 (Bù đắp luồn lách phốt nhảy)` chớp mắt là xòe ra hoàn lặn y bóc như chưa từng hụt.
+- Gân guốc chai sần sức chịu đựng (Stability):
+  - Hể có thằng giặc bệnh hoạn (lỗi vặt gỡ được) đập u đầu, chiếu cáo theo sách giáo khoa lôi tụi nó dậy làm lại (Automatic Retry).
+  - Bắt mạch thằng dính tà ma không gượng nổi (Bệnh vô đối xì bùn Failed), la lên phát còi cho dân thiên hạ bu xem Chết Thảm Hại ngáy khò đứt đoạn thẳng căng (Báo gắt rõ ràng chớ che).
+- Nới mắt soi thấu tận cội (Observability):
+  - Thảy cái log xả thải trọng yếu ra vũng, móc đính cho chắc 3 thanh sắt rọi định vị `runId/stepKey/attempt`. Hở cái là toi.
 
-## 验证方式
-- 单测：runtime、event seq、state guard、error mapping。
-- 集成：story_to_script_run、script_to_storyboard_run 的成功/失败/重试路径。
-- 回归：`npm run test:regression` 全绿。
+## Công phò Kẹp Đo Xác Minh Định Thu Nhận
+- Tế bào phân li (Đấu Single-Unit-Test): Ráp test thử chọt kim qua runtime / vạn biến nhảy múa chuỗi event seq / dàn bạt cắm state guard gánh bảo vệ / rẽ bẻ cung hướng đổ ải Error mapping. 
+- Ngồi nhậu gom sòng chụm Integrated Test: Xắn ống quần đu rèo bệt xuống test lòi dom cái sườn cung `story_to_script_run` / luồng ống `script_to_storyboard_run` bằng đủ mọi cách thức móc từ Cửa Sinh-Thành Cáo (Thắng) / Cửa Đóng-Tội Thác (Đứt bóng) / và cái cửa Mò Về Đạp Bóng (Retry hồi lại).
+- Lùng vây gom lưới bẻ giò Băng Đảng Regression: Bóp nút xả `npm run test:regression`, đòi hỏi kết quả xanh rì vắt kiệt giọt máu u nhọt bám lính.
 
-## 当前验证执行记录（持续追加）
+## Lịch Sử Điểm Chỉ Test Chọt (Ghi Nhận Chồng Thêm Xát Nuốt)
 - ✅ `npx vitest run tests/unit/run-runtime/task-bridge.test.ts`
 - ✅ `npx vitest run tests/unit/run-runtime/task-bridge.test.ts tests/unit/helpers/run-stream-state-machine.test.ts`
 - ✅ `npx vitest run tests/unit/helpers/run-request-executor.run-events.test.ts tests/unit/run-runtime/task-bridge.test.ts tests/unit/helpers/run-stream-state-machine.test.ts`
 - ✅ `npx vitest run tests/unit/helpers/run-request-executor.run-events.test.ts tests/unit/helpers/recovered-run-subscription.test.ts tests/unit/run-runtime/graph-executor.test.ts`
 - ✅ `npm run build`
-- ✅ `npm run test:regression` guard 阶段已通过（含新增 run routes catalog）
-- ⚠️ `npm run test:regression` 二次执行阻塞于仓库现有单测失败（与本轮 runtime 改造文件无直接耦合）：
-  - `tests/unit/optimistic/task-target-overlay.test.ts`（2 failures）
-  - `tests/unit/billing/cost-error-branches.test.ts`（1 failure）
-- ✅ `npm run build`（含 run-request-executor 改造后再次通过）
+- ✅ Thác nhảy vạch chặn canh giữ thúi nhịp của lệnh `npm run test:regression` (Lộ tuyến guard phase) đã xuất ải vinh danh (Cả bịch mới cấy tệp catalog lộ hướng trạm run routes cũng không si nhê xiên tủng).
+- ⚠️ Lôi đao chém dạo đâm chọt qua chặng bóp cò lần 2 đâm lùi sào nhét ứ của phát pháo `npm run test:regression`, bị bủa vây ngẹt phẹc bởi nhóm test cổ lỗ sĩ gào thét dội pháo đứt ruột rớt điểm do tàn dư lịch sử (Những tên cứng đầu phản đồ này chẳng bà con dòng máu ăn nhập chi với vụ mình di đời đổi chỗ Runtime cải biến lần này hết cả nha!):
+  - Bắn gẫy rụng 2 em: `tests/unit/optimistic/task-target-overlay.test.ts`
+  - Bắn gẫy rụng 1 em: `tests/unit/billing/cost-error-branches.test.ts`
+- ✅ Lập đàn cúng xả đúc nồi Code tiếp theo `npm run build` (Nồi súp gọt băm vọc cho xúi cái tay vào hố lửa bộ khung óc `run-request-executor`, đâm xuyên ngõ gạch là pass sướng rơn). 
 
-## 当前问题登记（必须先记录再推进）
-- ⚠️ 回归门禁未全绿：存在 3 个历史/并行改动引入的失败用例，导致 `test:regression` 无法通过。
-- ⚠️ 本地构建环境 Redis 未监听 `127.0.0.1:16379`，`next build` 期间出现大量连接拒绝日志，但构建产物仍成功输出。
+## Cuốn sổ Diêm Vương Kê Tội Hiện Trạng Lỗi Gập Chốt (Dặn Khắc Bia Dọng Trước Mới Được Đi)
+- ⚠️ Cánh đồng hoa dừa héo test Guard Phủ Đầu lác đác cỏ cháy, chẳng xanh đượm xanh nguyên (test:regression hụt chân vấp lác đác 3 em ngỏn ngoẻn lụn xương Test vướng mắc sút giảm nhịp hồi quy ngầm đến từ mầm họa cỗi thâm của mấy anh phá bĩnh song hành hay nhét tàn dư lịch sử ném vào, ngăn họng bóp phát pháo lệnh xả `test:regression` kẹt không hộc xanh lơ được).
+- ⚠️ Cửa sập sẩy xổng Lò vọc xông đất làm dạo local chui xó hầm cấu trúc Redis đi vắng không ai canh ở nhà số hẻm `127.0.0.1:16379`. Máy xúc cạp mẻ răng lúc vồ tạt ngang cơn khui xới lệnh `next build`. Loa thùng nó thét tru tre gào khan bịnh khước từ nhổ neo đâm thủng Redis quá trời phát nhật ký tít mù. Cơ mà, may sao của đút lò sinh sản xây thành Build artifact nó vẫn ấp ỉa lòi rặn sinh phọt ra được bộ rễ trọn vẹn chứ chưa bị phá banh xập mui sập mái. 
 
-# 5:备注
-- 本文档是唯一执行来源，必须与代码库保持同步。
-- 禁止隐式回退、禁止兼容层、禁止静默吞错。
-- 若遇阻塞，必须先登记到 `⚠️ 问题` 再继续可执行项。
+# 5: Góc Ngỏ Lời Gợi Khẽ Đính Kèm (Phụ gia vắt vai)
+- Bản văn nộp mạng này là Cái Bia Đá Lịch Sử Mõ Tòa Đích Chân để đi cày ruộng múa gươm mà phang Code, không xê xức. Nó phải nhịp tim thở nối sống hòa múc cùng cỗ xe Code base nhé.
+- Thò đũa vô Lập lệnh Phán cấm ngặt nghèo xạo đui rúc đâm thụt giả làm lơ lùi lại (implicit fallback). Cấm vọc ngứa tay gò gá hàn chắp múa riêu "Lớp vỏ khít Tương Thích (Compatibility layer)". Cấm họng nín câm nuốt cay ngậm đắng lịm chết giấu giếm cái Lỗi ọc nhè tịt còi (Silent Error Swallowing). 
+- Bị vướng gót sập hầm xóc họng ở chỗ khỉ ho cò gáy dạt nào đó hở? Xì tóp ngay. Đi lấy bút lông điểm đít ghi mẹ ngay vào rổ `⚠️ Danh Sách Vướng Mắc/Vấn Đề Problem` xong xuôi rành rẽ hẵng bò lết đi vạch gươm cày cái danh khoản trâu cày đang nợ dở được phép xắt tiếp theo. 

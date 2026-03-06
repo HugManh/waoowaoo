@@ -1,8 +1,8 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useCallback, useMemo, useState } from 'react'
-import { ART_STYLES } from '@/lib/constants'
+import { ART_STYLES, getArtStyleLabel } from '@/lib/constants'
 import { resolveTaskPresentationState } from '@/lib/task/presentation'
 import { useAiModifyProjectShotPrompt } from '@/lib/query/hooks'
 import type { NovelPromotionShot } from '@/types/project'
@@ -42,7 +42,7 @@ export function usePromptStageActions({
     return Boolean((shot as NovelPromotionShot & { imageTaskRunning?: boolean }).imageTaskRunning)
   }, [])
 
-  const styleLabel = ART_STYLES.find((style) => style.value === artStyle)?.label || t('prompts.customStyle')
+  const styleLabel = getArtStyleLabel(artStyle, useLocale() as any) || t('prompts.customStyle')
   const runningCount = shots.filter((shot) => isShotTaskRunning(shot)).length
   const [previewImage, setPreviewImage] = useState<string | null>(null)
 

@@ -18,6 +18,9 @@ import { AppIcon } from '@/components/ui/icons'
 interface ModelOption {
     value: string
     label: string
+    labelZh?: string
+    labelEn?: string
+    labelVi?: string
     provider?: string
     providerName?: string
     capabilities?: ModelCapabilities

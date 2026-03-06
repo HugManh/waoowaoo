@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useLocale } from 'next-intl'
 import { AppIcon, RatioPreviewIcon } from '@/components/ui/icons'
+import { getLocalizedLabel } from '@/lib/constants'
 
 interface RatioIconProps {
   ratio: string
@@ -12,13 +14,13 @@ interface RatioIconProps {
 interface RatioSelectorProps {
   value: string
   onChange: (value: string) => void
-  options: Array<{ value: string; label: string }>
+  options: Array<{ value: string; label?: string; labelZh?: string; labelEn?: string; labelVi?: string }>
 }
 
 interface StyleSelectorProps {
   value: string
   onChange: (value: string) => void
-  options: Array<{ value: string; label: string; preview: string }>
+  options: Array<{ value: string; label?: string; labelZh?: string; labelEn?: string; labelVi?: string; preview: string }>
 }
 
 function RatioIcon({ ratio, size = 24, selected = false }: RatioIconProps) {
@@ -58,7 +60,7 @@ export function RatioSelector({ value, onChange, options }: RatioSelectorProps) 
         <div className="flex items-center gap-3">
           <RatioIcon ratio={value} size={20} selected />
           <span className="text-sm text-[var(--glass-text-primary)] font-medium">
-            {selectedOption?.label || value}
+            {selectedOption ? getLocalizedLabel(selectedOption, useLocale() as any) : value}
           </span>
         </div>
         <AppIcon name="chevronDown" className={`w-4 h-4 text-[var(--glass-text-tertiary)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -78,21 +80,19 @@ export function RatioSelector({ value, onChange, options }: RatioSelectorProps) 
                   onChange(option.value)
                   setIsOpen(false)
                 }}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-[var(--glass-bg-muted)] transition-colors ${
-                  value === option.value
-                    ? 'bg-[var(--glass-tone-info-bg)] shadow-[0_0_0_1px_rgba(79,128,255,0.35)]'
-                    : ''
-                }`}
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-[var(--glass-bg-muted)] transition-colors ${value === option.value
+                  ? 'bg-[var(--glass-tone-info-bg)] shadow-[0_0_0_1px_rgba(79,128,255,0.35)]'
+                  : ''
+                  }`}
               >
                 <RatioIcon ratio={option.value} size={28} selected={value === option.value} />
                 <span
-                  className={`text-xs ${
-                    value === option.value
-                      ? 'text-[var(--glass-tone-info-fg)] font-medium'
-                      : 'text-[var(--glass-text-secondary)]'
-                  }`}
+                  className={`text-xs ${value === option.value
+                    ? 'text-[var(--glass-tone-info-fg)] font-medium'
+                    : 'text-[var(--glass-text-secondary)]'
+                    }`}
                 >
-                  {option.label}
+                  {getLocalizedLabel(option, useLocale() as any)}
                 </span>
               </button>
             ))}
@@ -128,7 +128,9 @@ export function StyleSelector({ value, onChange, options }: StyleSelectorProps) 
       >
         <div className="flex items-center gap-3">
           <span className="text-lg">{selectedOption.preview}</span>
-          <span className="text-sm text-[var(--glass-text-primary)] font-medium">{selectedOption.label}</span>
+          <span className="text-sm text-[var(--glass-text-primary)] font-medium">
+            {getLocalizedLabel(selectedOption, useLocale() as any)}
+          </span>
         </div>
         <AppIcon name="chevronDown" className={`w-4 h-4 text-[var(--glass-text-tertiary)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -144,14 +146,13 @@ export function StyleSelector({ value, onChange, options }: StyleSelectorProps) 
                   onChange(option.value)
                   setIsOpen(false)
                 }}
-                className={`flex items-center gap-2 p-3 rounded-lg text-left transition-all ${
-                  value === option.value
-                    ? 'bg-[var(--glass-tone-info-bg)] text-[var(--glass-tone-info-fg)] shadow-[0_0_0_1px_rgba(79,128,255,0.35)]'
-                    : 'hover:bg-[var(--glass-bg-muted)] text-[var(--glass-text-secondary)]'
-                }`}
+                className={`flex items-center gap-2 p-3 rounded-lg text-left transition-all ${value === option.value
+                  ? 'bg-[var(--glass-tone-info-bg)] text-[var(--glass-tone-info-fg)] shadow-[0_0_0_1px_rgba(79,128,255,0.35)]'
+                  : 'hover:bg-[var(--glass-bg-muted)] text-[var(--glass-text-secondary)]'
+                  }`}
               >
                 <span className="text-lg">{option.preview}</span>
-                <span className="font-medium text-sm">{option.label}</span>
+                <span className="font-medium text-sm">{getLocalizedLabel(option, useLocale() as any)}</span>
               </button>
             ))}
           </div>

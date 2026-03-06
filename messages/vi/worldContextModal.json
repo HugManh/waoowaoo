@@ -1,0 +1,6 @@
+{
+    "title": "Cài đặt Nhân vật & Thế giới",
+    "description": "Xác định ngoại hình nhân vật trên diễn biến toàn cục, phong cách bối cảnh, và mô tả môi trường chung cho toàn truyện",
+    "placeholder": "Ví dụ:\n【Nhân vật chính】Tuấn, 25 tuổi, tóc đen ngắn, luôn mặc áo khoác jean bạc màu, ánh mắt đượm buồn.\n【Nữ chính】Lan, 22 tuổi, tóc cột hai bên màu đỏ, tính cách nhí nhảnh, thích mặc đ váy kiểu Lolita.\n【Bối cảnh】Thành phố Cyberpunk năm 2077, đèn neon chớp nhoáng, trời mưa rả rích quanh năm...",
+    "hint": "Những cài đặt này sẽ được thừa kế bởi tất cả các tập như một thông số mẫu tham chiếu cho quá trình vẽ của AI."
+}

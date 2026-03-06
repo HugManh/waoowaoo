@@ -11,9 +11,10 @@
  */
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import type { CapabilityValue } from '@/lib/model-config-contract'
 import { AppIcon, RatioPreviewIcon } from '@/components/ui/icons'
+import { getLocalizedLabel } from '@/lib/constants'
 
 // ─── Types ────────────────────────────────────────────
 
@@ -22,6 +23,9 @@ export interface ModelCapabilityOption {
     value: string
     /** Display name */
     label: string
+    labelZh?: string
+    labelEn?: string
+    labelVi?: string
     /** Raw provider id */
     provider?: string
     /** Friendly provider name */
@@ -225,7 +229,7 @@ export function ModelCapabilityDropdown({
                         <>
                             <div className="flex items-center gap-2">
                                 <span className={`${textSize} text-[var(--glass-text-primary)] font-medium`}>
-                                    {selectedModel.label}
+                                    {getLocalizedLabel(selectedModel, useLocale() as any)}
                                 </span>
                                 <span className={`${providerSize} px-1.5 py-0.5 rounded border border-[var(--glass-stroke-base)] text-[var(--glass-text-tertiary)]`}>
                                     {selectedModel.providerName || selectedModel.provider || ''}
@@ -280,7 +284,7 @@ export function ModelCapabilityDropdown({
                                             : 'hover:bg-[var(--glass-bg-muted)] text-[var(--glass-text-secondary)]'
                                         }`}
                                 >
-                                    <span className={`font-medium ${modelOptionTextSize}`}>{m.label}</span>
+                                    <span className={`font-medium ${modelOptionTextSize}`}>{getLocalizedLabel(m, useLocale() as any)}</span>
                                     <span className={`${modelOptionProviderSize} rounded border border-[var(--glass-stroke-base)] text-[var(--glass-text-tertiary)]`}>
                                         {m.providerName || m.provider || ''}
                                     </span>

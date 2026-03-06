@@ -5,10 +5,10 @@
  * V3.2 UI: 极简版，专注剧本输入，资产管理移至资产库
  */
 
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useState, useRef, useEffect } from 'react'
 import '@/styles/animations.css'
-import { ART_STYLES, VIDEO_RATIOS } from '@/lib/constants'
+import { ART_STYLES, VIDEO_RATIOS, getLocalizedLabel } from '@/lib/constants'
 import TaskStatusInline from '@/components/task/TaskStatusInline'
 import { resolveTaskPresentationState } from '@/lib/task/presentation'
 import { AppIcon, RatioPreviewIcon } from '@/components/ui/icons'
@@ -30,7 +30,7 @@ function RatioSelector({
 }: {
   value: string
   onChange: (value: string) => void
-  options: { value: string; label: string }[]
+  options: { value: string; label?: string; labelZh?: string; labelEn?: string; labelVi?: string }[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -57,7 +57,9 @@ function RatioSelector({
       >
         <div className="flex items-center gap-3">
           <RatioIcon ratio={value} size={20} selected />
-          <span className="text-sm text-[var(--glass-text-primary)] font-medium">{selectedOption?.label || value}</span>
+          <span className="text-sm text-[var(--glass-text-primary)] font-medium">
+            {selectedOption ? getLocalizedLabel(selectedOption, useLocale() as any) : value}
+          </span>
         </div>
         <AppIcon name="chevronDown" className={`w-4 h-4 text-[var(--glass-text-tertiary)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -81,7 +83,7 @@ function RatioSelector({
               >
                 <RatioIcon ratio={option.value} size={28} selected={value === option.value} />
                 <span className={`text-xs ${value === option.value ? 'text-[var(--glass-tone-info-fg)] font-medium' : 'text-[var(--glass-text-secondary)]'}`}>
-                  {option.label}
+                  {getLocalizedLabel(option, useLocale() as any)}
                 </span>
               </button>
             ))}
@@ -102,7 +104,7 @@ function StyleSelector({
 }: {
   value: string
   onChange: (value: string) => void
-  options: { value: string; label: string; preview: string }[]
+  options: { value: string; label?: string; labelZh?: string; labelEn?: string; labelVi?: string; preview: string }[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -129,7 +131,9 @@ function StyleSelector({
       >
         <div className="flex items-center gap-3">
           <span className="text-lg">{selectedOption.preview}</span>
-          <span className="text-sm text-[var(--glass-text-primary)] font-medium">{selectedOption.label}</span>
+          <span className="text-sm text-[var(--glass-text-primary)] font-medium">
+            {getLocalizedLabel(selectedOption, useLocale() as any)}
+          </span>
         </div>
         <AppIcon name="chevronDown" className={`w-4 h-4 text-[var(--glass-text-tertiary)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -152,7 +156,7 @@ function StyleSelector({
                   }`}
               >
                 <span className="text-lg">{option.preview}</span>
-                <span className="font-medium text-sm">{option.label}</span>
+                <span className="font-medium text-sm">{getLocalizedLabel(option, useLocale() as any)}</span>
               </button>
             ))}
           </div>

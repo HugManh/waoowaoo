@@ -2,8 +2,8 @@
 import { logError as _ulogError } from '@/lib/logging/core'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { ART_STYLES } from '@/lib/constants'
+import { useTranslations, useLocale } from 'next-intl'
+import { ART_STYLES, getLocalizedLabel } from '@/lib/constants'
 import { useAiDesignLocation, useCreateAssetHubLocation } from '@/lib/query/hooks'
 import TaskStatusInline from '@/components/task/TaskStatusInline'
 import { resolveTaskPresentationState } from '@/lib/task/presentation'
@@ -174,7 +174,7 @@ export function AddLocationModal({ folderId, onClose, onSuccess }: AddLocationMo
                                             }`}
                                     >
                                         <span>{style.preview}</span>
-                                        <span>{style.label}</span>
+                                        <span>{getLocalizedLabel(style as any, useLocale() as any)}</span>
                                     </button>
                                 ))}
                             </div>

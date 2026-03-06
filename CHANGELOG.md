@@ -1,37 +1,38 @@
-# Changelog / 更新日志
+# Nhật ký Cập nhật / Changelog
 
-All notable changes to this project will be documented in this file.
-
----
-
-## [v0.2] - 2026-02-28
-
-### ✨ 新功能
-- 增加 OpenAI 兼容图片、视频格式支持
-
-### 🐛 修复
-- 修复默认模型配置后项目模型需要二次选择的问题
-- 修复部分情况 resolution 无法读取的问题
-- 修复模型链路为 LangGraph
-- 修复默认参数无选择问题
-- 修复关闭计费依然触发计费问题
-- 修复 openai-compatible 被误判为原生 OpenAI 推理问题
-- 修复 JSON 解析失败问题
-
-### ⚙️ 优化
-- 修改为默认计费 off
-- 增强提示词 JSON 格式限制
+Tất cả các thay đổi đáng chú ý của dự án sẽ được ghi lại trong tệp này.
 
 ---
 
-## [v0.2.1] - 2026-02-28
+## [v0.2] - 28/02/2026
 
-### 🐛 修复
-- 修复 AI 生成内容语言不跟随网站语言设置的问题
-- 修复前端 API 请求未携带 Accept-Language header 导致 locale 回退到浏览器默认语言
+### ✨ Tính năng Mới
+- Bổ sung hỗ trợ định dạng hình ảnh và video tương thích với OpenAI.
+
+### 🐛 Sửa lỗi
+- Khắc phục sự cố dự án yêu cầu phải chọn lại mô hình (model) sau khi đã thiết lập mô hình mặc định.
+- Khắc phục sự cố trong một số trường hợp không đọc được thông số độ phân giải (resolution).
+- Hoàn thiện và sửa lỗi kết nối luồng mô hình cho kiến trúc LangGraph.
+- Sửa lỗi trong đó phần tham số cấu hình mặc định không phản hồi hiển thị tùy chọn.
+- Xử lý triệt để vấn đề hệ thống vẫn tiếp tục tính tiền sau khi người dùng đã tắt chức năng tính phí (billing-off).
+- Khắc phục vấn đề đánh giá sai lệch, nhận nhầm mô hình tương thích API OpenAI (`openai-compatible`) thành luồng suy luận gốc của OpenAI.
+- Sửa lỗi hệ thống bị sập bộ phân tích khi xử lý định dạng chuỗi JSON.
+
+### ⚙️ Tối ưu hóa
+- Điều chỉnh thay đổi cấu hình tính phí mặc định hệ thống sang chế độ tắt (off).
+- Tăng cường khả năng hạn chế định dạng JSON nghiêm ngặt trong các câu lệnh nhắc (prompt).
+
 ---
 
-## [v0.1] - 2026-02-27
+## [v0.2.1] - 28/02/2026
 
-### 🎉 首次发布
-- 项目初始开源版本
+### 🐛 Sửa lỗi
+- Khắc phục tình trạng nội dung do AI tạo ra không sử dụng cùng ngôn ngữ ứng với thiết lập chung của trang web.
+- Sửa lỗi yêu cầu API từ giao diện người dùng (frontend) gửi thiếu tham số tiêu đề `Accept-Language`, dẫn đến việc bị đẩy cấu hình vùng (`locale`) rơi về ngôn ngữ mặc định của trình duyệt. 
+
+---
+
+## [v0.1] - 27/02/2026
+
+### 🎉 Phiên Bản Phát Hành Đầu Tiên (First Release)
+- Phiên bản mở mã nguồn ban đầu của dự án.

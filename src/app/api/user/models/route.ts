@@ -19,6 +19,12 @@ import {
 import { findBuiltinCapabilities } from '@/lib/model-capabilities/catalog'
 import { findBuiltinPricingCatalogEntry } from '@/lib/model-pricing/catalog'
 import type { VideoPricingTier } from '@/lib/model-pricing/video-tier'
+import {
+  ANALYSIS_MODELS,
+  IMAGE_MODEL_OPTIONS,
+  VIDEO_MODELS,
+  FIRST_LAST_FRAME_MODELS,
+} from '@/lib/constants'
 
 type StoredModelType = UnifiedModelType | string
 
@@ -39,6 +45,9 @@ interface StoredProvider {
 interface UserModelOption {
   value: string
   label: string
+  labelZh?: string
+  labelEn?: string
+  labelVi?: string
   provider?: string
   providerName?: string
   capabilities?: ModelCapabilities
@@ -197,11 +206,32 @@ export const GET = apiHandler(async () => {
     const provider = toProvider(model)
     if (!provider || !providerIdsWithApiKey.has(provider)) continue
     const modelId = toModelId(model)
+
+    const label = toDisplayLabel(model, modelId || modelKey)
     const option: UserModelOption = {
       value: modelKey,
-      label: toDisplayLabel(model, modelId || modelKey),
+      label,
       provider,
       providerName: provider ? providerNameMap.get(provider) : undefined,
+    }
+
+    // Try to find localized labels from constants
+    const knownModel = [
+      ...ANALYSIS_MODELS,
+      ...IMAGE_MODEL_OPTIONS,
+      ...VIDEO_MODELS,
+      ...FIRST_LAST_FRAME_MODELS,
+    ].find((m) => m.value === modelId || m.value === modelKey)
+
+    if (knownModel) {
+      if ('labelZh' in knownModel) option.labelZh = knownModel.labelZh as string
+      if ('labelEn' in knownModel) option.labelEn = knownModel.labelEn as string
+      if ('labelVi' in knownModel) option.labelVi = knownModel.labelVi as string
+    } else {
+      // If not a known model (e.g. customized name from user), just fallback
+      option.labelZh = label
+      option.labelEn = label
+      option.labelVi = label
     }
 
     if (provider && modelId) {

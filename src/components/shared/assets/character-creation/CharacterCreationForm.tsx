@@ -1,8 +1,8 @@
 'use client'
 
 import type { DragEvent, RefObject } from 'react'
-import { useTranslations } from 'next-intl'
-import { ART_STYLES } from '@/lib/constants'
+import { useTranslations, useLocale } from 'next-intl'
+import { ART_STYLES, getLocalizedLabel } from '@/lib/constants'
 import CharacterCreationPreview from './CharacterCreationPreview'
 import { AppIcon } from '@/components/ui/icons'
 
@@ -213,7 +213,7 @@ export default function CharacterCreationForm({
                   }`}
               >
                 <span>{style.preview}</span>
-                <span>{style.label}</span>
+                <span>{getLocalizedLabel(style as any, useLocale() as any)}</span>
               </button>
             ))}
           </div>

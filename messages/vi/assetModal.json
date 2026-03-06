@@ -1,0 +1,78 @@
+{
+    "character": {
+        "title": "Nhân vật Mới",
+        "name": "Tên Nhân vật",
+        "namePlaceholder": "Nhập tên nhân vật",
+        "modeReference": "Hình ảnh Mẫu",
+        "modeDescription": "Mô tả",
+        "isSubAppearance": "Đây là ngoại hình phụ",
+        "isSubAppearanceHint": "Thêm trạng thái ngoại hình mới cho một nhân vật đã có",
+        "uploadReference": "Tải Hình mẫu",
+        "pasteHint": "Ctrl+V để dán",
+        "dropOrClick": "Nhấp để tải hoặc kéo thả hình ảnh",
+        "supportedFormats": "Hỗ trợ định dạng JPG, PNG",
+        "nameRequired": "Vui lòng nhập tên nhân vật trước khi dùng tính năng chuyển đổi mẫu",
+        "convertToSheet": "Chuyển thành bản thiết kế chuẩn",
+        "referenceTip": "Tải lên ảnh nhân vật bất kỳ, AI sẽ tạo ra bảng thiết kế nhân vật chuẩn",
+        "description": "Mô tả Nhân vật",
+        "modifyDescription": "Sửa Mô tả",
+        "descPlaceholder": "Nhập mô tả ngoại hình nhân vật...",
+        "modifyDescriptionPlaceholder": "Mô tả cách thay đổi trang phục chính, vd: áo vest trang trọng, bị thương sau trận chiến, thêm áo choàng...",
+        "selectMainCharacter": "Chọn Nhân vật Chính",
+        "selectCharacterPlaceholder": "Vui lòng chọn nhân vật...",
+        "appearancesCount": "{count} ngoại hình",
+        "changeReason": "Lý do thay đổi cấu trúc ngoại",
+        "changeReasonPlaceholder": "vd: bị thương sau trận chiến, đã thay đồ lễ phục để dự tiệc...",
+        "defaultDescription": "Hồ sơ nhân vật của {name}",
+        "generationMode": "Chế độ Tạo",
+        "directGenerate": "Tạo Trực tiếp",
+        "extractPrompt": "Trích xuất Lời nhắc",
+        "extractFirst": "Trích xuất Mô tả Trước",
+        "directGenerateDesc": "Tạo trực tiếp bản thiết kế từ ảnh mẫu (img2img)",
+        "extractPromptDesc": "Trích xuất mô tả từ hình ảnh trước, sau đó tạo ra hình ảnh (txt2img)",
+        "maxReferenceImages": "Tối đa 5 hình ảnh tham khảo",
+        "selectedCount": "Đã chọn {count}/5 hình ảnh",
+        "extractDescription": "Trích xuất Mô tả",
+        "extracting": "Đang trích xuất...",
+        "extractedDescription": "Mô tả sau khi trích xuất (Có thể sửa)",
+        "reExtract": "Trích xuất lại",
+        "editHint": "Chỉnh sửa mô tả, sau đó nhấp vào nút dưới để tạo",
+        "generateFromDescription": "Tạo từ Mô tả",
+        "textToImageTip": "Chế độ Văn bản thành Hình ảnh: Tạo ra từ mô tả được trích xuất",
+        "pleaseExtractFirst": "Vui lòng trích xuất mô tả nhân vật trước"
+    },
+    "location": {
+        "title": "Bối cảnh Mới",
+        "name": "Tên Bối cảnh",
+        "namePlaceholder": "Nhập tên bối cảnh",
+        "description": "Mô tả Bối cảnh",
+        "descPlaceholder": "Nhập mô tả bối cảnh..."
+    },
+    "artStyle": {
+        "title": "Phong cách Nghệ thuật"
+    },
+    "aiDesign": {
+        "title": "Thiết kế AI",
+        "placeholder": "Mô tả nhân vật bạn muốn...",
+        "placeholderLocation": "Mô tả không khí của bối cảnh...",
+        "generating": "Đang thiết kế...",
+        "generate": "Tạo",
+        "tip": "Nhập mô tả ngắn gọn, AI sẽ tính toán chi tiết thiết lập"
+    },
+    "common": {
+        "creating": "Đang tạo...",
+        "create": "Tạo",
+        "cancel": "Hủy",
+        "adding": "Đang thêm...",
+        "add": "Thêm",
+        "optional": "(Tùy chọn)"
+    },
+    "errors": {
+        "uploadFailed": "Tải lên thất bại",
+        "extractDescriptionFailed": "Trích xuất mô tả thất bại",
+        "createFailed": "Tạo nhân vật/bối cảnh thất bại",
+        "aiDesignFailed": "Thiết kế AI thất bại",
+        "addSubAppearanceFailed": "Không thể thêm trang phục phụ",
+        "insufficientBalance": "Số dư không đủ"
+    }
+}

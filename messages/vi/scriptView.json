@@ -1,0 +1,70 @@
+{
+    "title": "Chế độ xem kịch bản",
+    "scriptBreakdown": "Chia nhỏ kịch bản",
+    "splitCount": "Đã tách {count} cảnh",
+    "noClips": "Chưa có cảnh nào, vui lòng tạo từ chế độ xem cốt truyện",
+    "segment": {
+        "title": "Cảnh {index}",
+        "selected": "(Được chọn)"
+    },
+    "inSceneAssets": "Tài sản trong cảnh",
+    "currentSelected": "Đã chọn: Cảnh {number}",
+    "assetView": {
+        "allClips": "Tất cả các cảnh",
+        "viewingClip": "Đang xem cảnh {number}"
+    },
+    "asset": {
+        "generateCharacter": "Nhấp để tạo nhân vật →",
+        "generateLocation": "Nhấp để tạo bối cảnh →",
+        "removeCharacterConfirm": "Bạn có chắc chắn muốn xóa nhân vật này khỏi cảnh hiện tại không?",
+        "removeLocationConfirm": "Bạn có chắc chắn muốn xóa bối cảnh này khỏi cảnh hiện tại không?",
+        "removeFromClip": "Xóa khỏi cảnh hiện tại",
+        "noAudio": "Không có âm thanh",
+        "playing": "Đang phát",
+        "listen": "Nghe",
+        "activeCharacters": "Nhân vật đang có",
+        "activeLocations": "Bối cảnh đang có",
+        "selectCharacter": "Chọn nhân vật/diện mạo để thêm vào",
+        "selectLocation": "Chọn bối cảnh để thêm vào",
+        "loadingAssets": "Đang tải tài sản...",
+        "appearanceCount": "{count} diện mạo",
+        "added": "Đã thêm",
+        "primary": "Chính",
+        "subAppearance": "Diện mạo phụ",
+        "defaultAppearance": "Diện mạo mặc định",
+        "clickToRemove": "Nhấp để xóa {name}",
+        "clickToAdd": "Nhấp để thêm {name}"
+    },
+    "screenplay": {
+        "scene": "Cảnh quay {number}",
+        "location": "Bối cảnh:",
+        "locationTime": "Thời gian:",
+        "day": "Ngày",
+        "night": "Đêm",
+        "dawn": "Bình minh",
+        "dusk": "Hoàng hôn",
+        "dialogue": "Hội thoại",
+        "action": "Hành động",
+        "narration": "Lời dẫn truyện",
+        "content": "Nội dung gốc",
+        "noContent": "Chưa có nội dung",
+        "clickToEdit": "Nhấp để sửa",
+        "interior": "TRONG NHÀ (INT)",
+        "exterior": "NGOÀI TRỜI (EXT)",
+        "characters": "Nhân vật",
+        "noCharacter": "Không có thông tin nhân vật",
+        "noLocation": "Không có bối cảnh đang hoạt động",
+        "noCharacterInClip": "Không có nhân vật đang hoạt động"
+    },
+    "confirm": {
+        "removeCharacter": "Bạn có chắc chắn muốn xóa nhân vật này khỏi cảnh hiện tại không?",
+        "removeLocation": "Bạn có chắc chắn muốn xóa bối cảnh này khỏi cảnh hiện tại không?"
+    },
+    "generate": {
+        "missingAssets": "Thiếu hình ảnh của {count} tài sản",
+        "missingAssetsTip": "Vui lòng tạo hình ảnh cho tất cả các nhân vật và bối cảnh ở",
+        "missingAssetsTipLink": "trước",
+        "generating": "Đang tạo...",
+        "startGenerate": "Xác nhận và Bắt đầu vẽ →"
+    }
+}

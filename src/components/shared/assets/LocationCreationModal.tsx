@@ -2,9 +2,9 @@
 import { logError as _ulogError } from '@/lib/logging/core'
 
 import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { AppIcon } from '@/components/ui/icons'
-import { ART_STYLES } from '@/lib/constants'
+import { ART_STYLES, getLocalizedLabel } from '@/lib/constants'
 import { shouldShowError } from '@/lib/error-utils'
 import TaskStatusInline from '@/components/task/TaskStatusInline'
 import { resolveTaskPresentationState } from '@/lib/task/presentation'
@@ -232,7 +232,7 @@ export function LocationCreationModal({
                                             }`}
                                     >
                                         <span>{style.preview}</span>
-                                        <span>{style.label}</span>
+                                        <span>{getLocalizedLabel(style as any, useLocale() as any)}</span>
                                     </button>
                                 ))}
                             </div>

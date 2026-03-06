@@ -1,0 +1,14 @@
+{
+    "title": "Thư viện Tài sản",
+    "button": "Tài sản",
+    "characters": "Nhân vật",
+    "locations": "Bối cảnh",
+    "noCharacters": "Không có nhân vật",
+    "noLocations": "Không có bối cảnh",
+    "addCharacter": "Thêm Nhân vật",
+    "addLocation": "Thêm Bối cảnh",
+    "generateImage": "Tạo Hình ảnh",
+    "regenerateImage": "Tạo lại",
+    "analyzeAssets": "Phân tích Tài sản",
+    "analyzing": "Đang phân tích..."
+}
